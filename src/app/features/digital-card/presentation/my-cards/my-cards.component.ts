@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { DigitalCardService, DigitalCardResponse } from '../../data/services/digital-card.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-my-cards',
@@ -11,54 +12,52 @@ import { DigitalCardService, DigitalCardResponse } from '../../data/services/dig
     <div class="my-cards-container">
       <div class="header">
         <h2>Dijital Kartlarım</h2>
-        <a routerLink="/create-card" class="create-btn">
+        <a routerLink="/create-card" class="create-btn" *ngIf="!card">
           <i class="fas fa-plus"></i>
           Yeni Kart Oluştur
         </a>
       </div>
 
-      <div class="cards-grid">
-        <div *ngFor="let card of cards" class="card-item">
-          <div class="card-content">
-            <div class="card-header">
-              <h3>{{ card.fullName }}</h3>
-              <div class="actions">
-                <button class="edit-btn" [routerLink]="['/cards', card.username, 'edit']">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="delete-btn" (click)="deleteCard(card)">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
+      <div *ngIf="card" class="card-item">
+        <div class="card-content">
+          <div class="card-header">
+            <h3>{{ card.fullName }}</h3>
+            <div class="actions">
+              <button class="edit-btn" [routerLink]="['/cards', card.username, 'edit']">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-btn" (click)="deleteCard(card)">
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
+          </div>
 
-            <p class="title">{{ card.title }}</p>
-            <p class="biography">{{ card.biography }}</p>
+          <p class="title">{{ card.title }}</p>
+          <p class="biography">{{ card.biography }}</p>
 
-            <div class="skills">
-              <span *ngFor="let skill of card.skills" class="skill-tag">
-                {{ skill }}
-              </span>
-            </div>
+          <div class="skills">
+            <span *ngFor="let skill of card.skills" class="skill-tag">
+              {{ skill }}
+            </span>
+          </div>
 
-            <div class="social-links">
-              <a *ngFor="let link of card.socialMediaLinks" 
-                 [href]="link.url" 
-                 target="_blank" 
-                 class="social-link"
-                 [title]="link.customName || link.platform">
-                <i [class]="'fab fa-' + link.platform.toLowerCase()"></i>
-              </a>
-            </div>
-
-            <a [routerLink]="['/cards', card.username]" class="view-profile">
-              Profili Görüntüle
+          <div class="social-links">
+            <a *ngFor="let link of card.socialMediaLinks" 
+               [href]="link.url" 
+               target="_blank" 
+               class="social-link"
+               [title]="link.customName || link.platform">
+              <i [class]="'fab fa-' + link.platform.toLowerCase()"></i>
             </a>
           </div>
+
+          <a [routerLink]="['/cards', card.username]" class="view-profile">
+            Profili Görüntüle
+          </a>
         </div>
       </div>
 
-      <div *ngIf="cards.length === 0" class="empty-state">
+      <div *ngIf="!card && !isLoading" class="empty-state">
         <i class="fas fa-id-card"></i>
         <h3>Henüz dijital kartınız yok</h3>
         <p>İlk dijital kartınızı oluşturmak için "Yeni Kart Oluştur" butonuna tıklayın.</p>
@@ -66,6 +65,15 @@ import { DigitalCardService, DigitalCardResponse } from '../../data/services/dig
           <i class="fas fa-plus"></i>
           Yeni Kart Oluştur
         </a>
+      </div>
+
+      <div *ngIf="isLoading" class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Kartınız yükleniyor...</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
       </div>
     </div>
   `,
@@ -267,24 +275,76 @@ import { DigitalCardService, DigitalCardResponse } from '../../data/services/dig
         display: inline-flex;
       }
     }
+
+    .loading-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      i {
+        font-size: 2rem;
+        color: #FF6B00;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: #4A5568;
+      }
+    }
+
+    .error-message {
+      background-color: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #DC2626;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
   `]
 })
 export class MyCardsComponent implements OnInit {
-  cards: DigitalCardResponse[] = [];
+  card: DigitalCardResponse | null = null;
+  isLoading = false;
+  errorMessage: string | null = null;
 
-  constructor(private digitalCardService: DigitalCardService) {}
+  constructor(
+    private digitalCardService: DigitalCardService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.loadCards();
+    this.loadCard();
   }
 
-  loadCards(): void {
-    this.digitalCardService.getCards().subscribe({
-      next: (cards: DigitalCardResponse[]) => {
-        this.cards = cards;
+  loadCard(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    const username = this.authService.getCurrentUsername();
+    if (!username) {
+      this.errorMessage = 'Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
+      this.isLoading = false;
+      return;
+    }
+
+    this.digitalCardService.getDigitalCard(username).subscribe({
+      next: (card: DigitalCardResponse) => {
+        this.card = card;
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error('Kartlar yüklenirken hata oluştu:', error);
+        console.error('Kart yüklenirken hata oluştu:', error);
+        if (error.status === 404) {
+          // Kart bulunamadıysa boş durumu göster
+          this.card = null;
+        } else {
+          this.errorMessage = 'Kartınız yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+        }
+        this.isLoading = false;
       }
     });
   }
@@ -293,10 +353,11 @@ export class MyCardsComponent implements OnInit {
     if (confirm('Bu kartı silmek istediğinizden emin misiniz?')) {
       this.digitalCardService.deleteDigitalCard().subscribe({
         next: () => {
-          this.cards = this.cards.filter(c => c.id !== card.id);
+          this.card = null;
         },
         error: (error) => {
           console.error('Kart silinirken hata oluştu:', error);
+          this.errorMessage = 'Kart silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
         }
       });
     }
