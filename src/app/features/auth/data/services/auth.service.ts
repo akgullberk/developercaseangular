@@ -7,11 +7,22 @@ import { LoginRequest } from '../../domain/models/login-request.model';
 import { RegisterRequest } from '../../domain/models/register-request.model';
 import { StorageService } from '../../../../core/services/storage.service';
 
+// Environment değişkenlerini doğrudan tanımlayalım
+const API_URL = 'http://localhost:8081/api';
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  name: string;
+  surname: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8081/api/auth';
+  private readonly AUTH_URL = `${API_URL}/auth`;
 
   constructor(
     private readonly http: HttpClient,
@@ -20,7 +31,7 @@ export class AuthService {
 
   login(loginRequest: LoginRequest): Observable<any> {
     console.log('Login isteği gönderiliyor:', loginRequest);
-    return this.http.post(`${this.API_URL}/login`, loginRequest)
+    return this.http.post(`${this.AUTH_URL}/login`, loginRequest)
       .pipe(
         tap((response: any) => {
           console.log('Login yanıtı:', response);
@@ -38,11 +49,10 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post(`${this.API_URL}/register`, registerRequest, { headers })
+    return this.http.post(`${this.AUTH_URL}/register`, registerRequest, { headers })
       .pipe(
         map((response: any) => {
           console.log('Kayıt yanıtı:', response);
-          // Eğer backend boş response dönüyorsa, başarılı bir yanıt oluşturalım
           return response || { success: true, message: 'Kayıt başarılı' };
         }),
         catchError((error) => {
@@ -62,5 +72,25 @@ export class AuthService {
 
   getToken(): string | null {
     return this.storage.getItem('token');
+  }
+
+  getUserProfile(): Observable<UserProfile> {
+    const token = this.storage.getItem('token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get<UserProfile>(`${API_URL}/users/profile`, { headers });
+  }
+
+  updateUserProfile(profileData: Partial<UserProfile>): Observable<UserProfile> {
+    const token = this.storage.getItem('token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.patch<UserProfile>(`${API_URL}/users/profile`, profileData, { headers });
   }
 } 

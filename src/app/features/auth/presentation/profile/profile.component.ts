@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../data/services/auth.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService, UserProfile } from '../../data/services/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile',
@@ -21,12 +22,13 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
             <h2>Kişisel Bilgiler</h2>
             
             <div class="form-group">
-              <label for="fullName">Ad Soyad</label>
+              <label for="username">Kullanıcı Adı</label>
               <input 
                 type="text" 
-                id="fullName" 
-                formControlName="fullName"
-                placeholder="Ad Soyad"
+                id="username" 
+                [value]="userProfile?.username"
+                readonly
+                class="readonly-input"
               >
             </div>
 
@@ -35,43 +37,29 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
               <input 
                 type="email" 
                 id="email" 
-                formControlName="email"
-                placeholder="E-posta adresiniz"
+                [value]="userProfile?.email"
                 readonly
-              >
-            </div>
-          </div>
-
-          <div class="form-section">
-            <h2>Şifre Değiştir</h2>
-            
-            <div class="form-group">
-              <label for="currentPassword">Mevcut Şifre</label>
-              <input 
-                type="password" 
-                id="currentPassword" 
-                formControlName="currentPassword"
-                placeholder="Mevcut şifreniz"
+                class="readonly-input"
               >
             </div>
 
             <div class="form-group">
-              <label for="newPassword">Yeni Şifre</label>
+              <label for="name">Ad</label>
               <input 
-                type="password" 
-                id="newPassword" 
-                formControlName="newPassword"
-                placeholder="Yeni şifreniz"
+                type="text" 
+                id="name" 
+                formControlName="name"
+                placeholder="Adınız"
               >
             </div>
 
             <div class="form-group">
-              <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
+              <label for="surname">Soyad</label>
               <input 
-                type="password" 
-                id="confirmPassword" 
-                formControlName="confirmPassword"
-                placeholder="Yeni şifrenizi tekrar girin"
+                type="text" 
+                id="surname" 
+                formControlName="surname"
+                placeholder="Soyadınız"
               >
             </div>
           </div>
@@ -86,10 +74,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
         <div class="profile-sidebar">
           <div class="profile-card">
             <div class="profile-avatar">
-              <span>{{ getInitials(profileForm.get('fullName')?.value || '') }}</span>
+              <span>{{ getInitials() }}</span>
             </div>
-            <h3>{{ profileForm.get('fullName')?.value || 'Kullanıcı' }}</h3>
-            <p>{{ profileForm.get('email')?.value || 'E-posta' }}</p>
+            <h3>{{ getFullName() }}</h3>
+            <p>{{ userProfile?.email }}</p>
+            <p class="username">Kullanıcı adı: {{ userProfile?.username }}</p>
           </div>
 
           <div class="quick-links">
@@ -326,67 +315,91 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
         }
       }
     }
+
+    .readonly-input {
+      background-color: #F7FAFC !important;
+      cursor: not-allowed !important;
+    }
+
+    .username {
+      color: #718096;
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
   `]
 })
 export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   isLoading = false;
+  userProfile: UserProfile | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService
   ) {
     this.profileForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      currentPassword: [''],
-      newPassword: ['', [Validators.minLength(6)]],
-      confirmPassword: ['']
-    }, { validator: this.passwordMatchValidator });
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      surname: ['', [Validators.required, Validators.minLength(2)]]
+    });
   }
 
   ngOnInit(): void {
-    // Kullanıcı bilgilerini form'a yükle
     this.loadUserProfile();
   }
 
   loadUserProfile(): void {
-    // TODO: AuthService'den kullanıcı bilgilerini al
-    const mockUser = {
-      fullName: 'Ahmet Yılmaz',
-      email: 'ahmet@example.com'
-    };
-
-    this.profileForm.patchValue({
-      fullName: mockUser.fullName,
-      email: mockUser.email
-    });
+    this.isLoading = true;
+    this.authService.getUserProfile()
+      .pipe(
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe({
+        next: (profile) => {
+          this.userProfile = profile;
+          this.profileForm.patchValue({
+            name: profile.name,
+            surname: profile.surname
+          });
+        },
+        error: (error) => {
+          console.error('Profil bilgileri yüklenirken hata oluştu:', error);
+          // TODO: Hata mesajı göster
+        }
+      });
   }
 
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('newPassword')?.value === g.get('confirmPassword')?.value
-      ? null : { mismatch: true };
+  getInitials(): string {
+    if (!this.userProfile) return '';
+    return `${this.userProfile.name[0]}${this.userProfile.surname[0]}`.toUpperCase();
   }
 
-  getInitials(name: string): string {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase();
+  getFullName(): string {
+    if (!this.userProfile) return '';
+    return `${this.userProfile.name} ${this.userProfile.surname}`;
   }
 
   onSubmit(): void {
     if (this.profileForm.valid) {
       this.isLoading = true;
-      // TODO: Profil güncelleme işlemleri
-      console.log('Form değerleri:', this.profileForm.value);
-      
-      // Simüle edilmiş API çağrısı
-      setTimeout(() => {
-        this.isLoading = false;
-        // Başarılı güncelleme mesajı göster
-      }, 1000);
+      const updateData = {
+        name: this.profileForm.get('name')?.value,
+        surname: this.profileForm.get('surname')?.value
+      };
+
+      this.authService.updateUserProfile(updateData)
+        .pipe(
+          finalize(() => this.isLoading = false)
+        )
+        .subscribe({
+          next: (updatedProfile) => {
+            this.userProfile = updatedProfile;
+            // TODO: Başarılı güncelleme mesajı göster
+          },
+          error: (error) => {
+            console.error('Profil güncellenirken hata oluştu:', error);
+            // TODO: Hata mesajı göster
+          }
+        });
     }
   }
 } 
