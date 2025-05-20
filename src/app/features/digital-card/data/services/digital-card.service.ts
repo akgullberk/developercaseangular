@@ -1,31 +1,88 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DigitalCard } from '../../domain/models/digital-card.model';
-import { DigitalCardRepository } from '../repositories/digital-card.repository';
+import { StorageService } from '../../../../core/services/storage.service';
+
+const API_URL = 'http://localhost:8081/api';
+
+export interface SocialMediaLink {
+  platform: string;
+  url: string;
+  customName?: string;
+}
+
+export interface DigitalCardRequest {
+  fullName: string;
+  profilePhotoUrl?: string;
+  title?: string;
+  biography?: string;
+  socialMediaLinks: SocialMediaLink[];
+  skills: string[];
+}
+
+export interface DigitalCardResponse {
+  id: number;
+  fullName: string;
+  profilePhotoUrl?: string;
+  title?: string;
+  biography?: string;
+  username: string;
+  socialMediaLinks: SocialMediaLink[];
+  skills: string[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class DigitalCardService {
-  constructor(private repository: DigitalCardRepository) {}
+  private readonly DIGITAL_CARDS_URL = `${API_URL}/digital-cards`;
 
-  getCards(): Observable<DigitalCard[]> {
-    return this.repository.getCards();
+  constructor(
+    private readonly http: HttpClient,
+    private readonly storage: StorageService
+  ) {}
+
+  private getHeaders(): HttpHeaders {
+    const token = this.storage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
   }
 
-  getCardById(id: string): Observable<DigitalCard | undefined> {
-    return this.repository.getCardById(id);
+  getCards(): Observable<DigitalCardResponse[]> {
+    return this.http.get<DigitalCardResponse[]>(
+      `${this.DIGITAL_CARDS_URL}/my-cards`,
+      { headers: this.getHeaders() }
+    );
   }
 
-  createCard(card: Omit<DigitalCard, 'id'>): Observable<DigitalCard> {
-    return this.repository.createCard(card);
+  createDigitalCard(cardData: DigitalCardRequest): Observable<DigitalCardResponse> {
+    return this.http.post<DigitalCardResponse>(
+      this.DIGITAL_CARDS_URL,
+      cardData,
+      { headers: this.getHeaders() }
+    );
   }
 
-  updateCard(id: string, card: Partial<DigitalCard>): Observable<DigitalCard | undefined> {
-    return this.repository.updateCard(id, card);
+  getDigitalCard(username: string): Observable<DigitalCardResponse> {
+    return this.http.get<DigitalCardResponse>(
+      `${this.DIGITAL_CARDS_URL}/${username}`
+    );
   }
 
-  deleteCard(id: string): Observable<boolean> {
-    return this.repository.deleteCard(id);
+  updateDigitalCard(cardData: DigitalCardRequest): Observable<DigitalCardResponse> {
+    return this.http.put<DigitalCardResponse>(
+      this.DIGITAL_CARDS_URL,
+      cardData,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteDigitalCard(): Observable<void> {
+    return this.http.delete<void>(
+      this.DIGITAL_CARDS_URL,
+      { headers: this.getHeaders() }
+    );
   }
 } 
