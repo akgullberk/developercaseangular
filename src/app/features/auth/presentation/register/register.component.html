@@ -1,0 +1,103 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2>Kayıt Ol</h2>
+    <div class="success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Kullanıcı Adı</label>
+        <input 
+          type="text" 
+          id="username" 
+          formControlName="username" 
+          [class.error]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
+        >
+        <div class="error-message" *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+          <span *ngIf="registerForm.get('username')?.errors?.['required']">
+            Kullanıcı adı gereklidir
+          </span>
+          <span *ngIf="registerForm.get('username')?.errors?.['minlength']">
+            Kullanıcı adı en az 3 karakter olmalıdır
+          </span>
+          <span *ngIf="registerForm.get('username')?.errors?.['pattern']">
+            Kullanıcı adı sadece harf, rakam ve (._-) karakterlerini içerebilir
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-posta</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+        >
+        <div class="error-message" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          Geçerli bir e-posta adresi giriniz
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Ad</label>
+        <input 
+          type="text" 
+          id="name" 
+          formControlName="name"
+          [class.error]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched"
+        >
+        <div class="error-message" *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+          Ad alanı gereklidir
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="surname">Soyad</label>
+        <input 
+          type="text" 
+          id="surname" 
+          formControlName="surname"
+          [class.error]="registerForm.get('surname')?.invalid && registerForm.get('surname')?.touched"
+        >
+        <div class="error-message" *ngIf="registerForm.get('surname')?.invalid && registerForm.get('surname')?.touched">
+          Soyad alanı gereklidir
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Şifre</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password"
+          [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+        >
+        <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          <span *ngIf="registerForm.get('password')?.errors?.['required']">
+            Şifre gereklidir
+          </span>
+          <span *ngIf="registerForm.get('password')?.errors?.['minlength']">
+            Şifre en az 6 karakter olmalıdır
+          </span>
+          <span *ngIf="registerForm.get('password')?.errors?.['pattern']">
+            Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir
+          </span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Kayıt Ol</span>
+        <span *ngIf="isLoading">Kayıt Yapılıyor...</span>
+      </button>
+    </form>
+
+    <div class="login-link">
+      Zaten hesabınız var mı? <a routerLink="/login">Giriş Yap</a>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,28 @@
+<div class="digital-card">
+    <div class="card-header">
+        <div class="profile-circle">
+            <span>{{getInitials(card.fullName)}}</span>
+        </div>
+        <div class="social-links">
+            <a *ngIf="card.socialLinks.github" [href]="card.socialLinks.github" target="_blank">
+                <i class="fab fa-github"></i>
+            </a>
+            <a *ngIf="card.socialLinks.linkedin" [href]="card.socialLinks.linkedin" target="_blank">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a *ngIf="card.socialLinks.twitter" [href]="card.socialLinks.twitter" target="_blank">
+                <i class="fab fa-twitter"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="card-content">
+        <h2 class="name">{{card.fullName}}</h2>
+        <p class="title">{{card.title}}</p>
+        <p class="bio">{{card.biography}}</p>
+        
+        <div class="skills">
+            <span class="skill-tag" *ngFor="let skill of card.skills">{{skill}}</span>
+        </div>
+    </div>
+</div>

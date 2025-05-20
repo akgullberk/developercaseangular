@@ -1,0 +1,45 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Giriş Yap</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Kullanıcı Adı</label>
+        <input 
+          type="text" 
+          id="username" 
+          formControlName="username" 
+          [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+        >
+        <div class="error-message" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+          Kullanıcı adı gereklidir
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Şifre</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password"
+          [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        >
+        <div class="error-message" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          Şifre en az 6 karakter olmalıdır
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Giriş Yap</span>
+        <span *ngIf="isLoading">Giriş Yapılıyor...</span>
+      </button>
+    </form>
+
+    <div class="register-link">
+      Hesabınız yok mu? <a routerLink="/register">Kayıt Ol</a>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,149 @@
+.digital-card {
+    background: #FF6B00;
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 10px 30px -5px rgba(255, 107, 0, 0.3);
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0.1) 100%
+        );
+        border-radius: inherit;
+        transform: translateZ(-10px);
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    &:hover {
+        transform: perspective(1000px) rotateX(10deg) rotateY(5deg) translateZ(10px);
+        box-shadow: 0 20px 40px -10px rgba(255, 107, 0, 0.4);
+
+        &::before {
+            transform: translateZ(-20px);
+        }
+
+        .card-header {
+            .profile-circle {
+                transform: translateZ(20px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .social-links a {
+                transform: translateZ(15px);
+                opacity: 1;
+            }
+        }
+
+        .card-content {
+            transform: translateZ(10px);
+
+            .skills .skill-tag {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateZ(5px);
+            }
+        }
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+
+        .profile-circle {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+
+            a {
+                color: white;
+                font-size: 1.2rem;
+                opacity: 0.8;
+                transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+                position: relative;
+
+                &:hover {
+                    opacity: 1;
+                    transform: translateZ(25px) scale(1.1);
+                }
+            }
+        }
+    }
+
+    .card-content {
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+
+        .name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(120deg, #ffffff, rgba(255, 255, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transform: translateZ(5px);
+        }
+
+        .title {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .bio {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+
+            .skill-tag {
+                background: rgba(255, 255, 255, 0.2);
+                padding: 0.4rem 1rem;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+                backdrop-filter: blur(5px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                position: relative;
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: translateZ(15px) scale(1.05);
+                }
+            }
+        }
+    }
+}
