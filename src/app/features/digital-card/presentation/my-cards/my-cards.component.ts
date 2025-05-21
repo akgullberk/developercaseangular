@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { DigitalCardService, DigitalCardResponse } from '../../data/services/digital-card.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '../../../auth/data/services/auth.service';
 
 @Component({
   selector: 'app-my-cards',
@@ -18,42 +18,29 @@ import { AuthService } from '../../../../core/services/auth.service';
         </a>
       </div>
 
-      <div *ngIf="card" class="card-item">
-        <div class="card-content">
-          <div class="card-header">
-            <h3>{{ card.fullName }}</h3>
-            <div class="actions">
-              <button class="edit-btn" [routerLink]="['/cards', card.username, 'edit']">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="delete-btn" (click)="deleteCard(card)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
+      <div *ngIf="card" class="card-item custom-card">
+        <div class="card-header-row">
+          <div class="avatar">
+            <ng-container *ngIf="card.profilePhotoUrl && card.profilePhotoUrl !== ''; else initials">
+              <img [src]="card.profilePhotoUrl" alt="Avatar" (error)="card.profilePhotoUrl = ''" />
+            </ng-container>
+            <ng-template #initials>
+              <span>{{ getInitials(card.fullName) }}</span>
+            </ng-template>
           </div>
-
-          <p class="title">{{ card.title }}</p>
-          <p class="biography">{{ card.biography }}</p>
-
-          <div class="skills">
-            <span *ngFor="let skill of card.skills" class="skill-tag">
-              {{ skill }}
-            </span>
-          </div>
-
-          <div class="social-links">
-            <a *ngFor="let link of card.socialMediaLinks" 
-               [href]="link.url" 
-               target="_blank" 
-               class="social-link"
-               [title]="link.customName || link.platform">
-              <i [class]="'fab fa-' + link.platform.toLowerCase()"></i>
+          <div class="social-icons">
+            <a *ngFor="let link of card.socialMediaLinks" [href]="link.url" target="_blank" [title]="link.customName || link.platform">
+              <i [ngClass]="getSocialIconClass(link.platform)"></i>
             </a>
           </div>
-
-          <a [routerLink]="['/cards', card.username]" class="view-profile">
-            Profili Görüntüle
-          </a>
+        </div>
+        <div class="card-main-content">
+          <h3 class="fullname">{{ card.fullName }}</h3>
+          <p class="title">{{ card.title }}</p>
+          <p class="biography">{{ getShortBiography(card.biography) }}</p>
+          <div #skillsContainer class="skills">
+            <span *ngFor="let skill of getVisibleSkills(card.skills, 3)" class="skill-tag">{{ formatSkill(skill) }}</span>
+          </div>
         </div>
       </div>
 
@@ -204,16 +191,25 @@ import { AuthService } from '../../../../core/services/auth.service';
     .skills {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
+      gap: 0.4rem;
+    }
 
-      .skill-tag {
-        background: #EDF2F7;
-        color: #4A5568;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.8rem;
-      }
+    .skill-tag {
+      background: linear-gradient(90deg, #ff9800 0%, #ff6b00 100%);
+      color: #fff;
+      padding: 0.3rem 1.2rem;
+      border-radius: 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.2rem;
+      border: none;
+      box-shadow: none;
+      display: inline-block;
+      white-space: nowrap;
+      
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .social-links {
@@ -303,12 +299,101 @@ import { AuthService } from '../../../../core/services/auth.service';
       margin-top: 1.5rem;
       text-align: center;
     }
+
+    .custom-card {
+      background: linear-gradient(135deg, #ff9800 0%, #ff6b00 100%);
+      color: #fff;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 24px rgba(255, 107, 0, 0.15);
+      height: 310px;
+      padding: 1rem 2rem 1rem 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+      overflow: visible;
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+    }
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+    .avatar span {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .social-icons {
+      display: flex;
+      gap: 1.2rem;
+      margin-top: 0.2rem;
+    }
+    .social-icons a {
+      color: #fff;
+      font-size: 1.4rem;
+      transition: color 0.2s;
+    }
+    .social-icons a:hover {
+      color: #222;
+    }
+    .card-main-content {
+      text-align: left;
+    }
+    .fullname {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .biography {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #fff;
+      opacity: 1;
+    }
+    .more-skills {
+      background: linear-gradient(90deg, #ff9800 0%, #ff6b00 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+    }
   `]
 })
-export class MyCardsComponent implements OnInit {
+export class MyCardsComponent implements OnInit, AfterViewInit {
+  @ViewChild('skillsContainer') skillsContainer!: ElementRef<HTMLDivElement>;
   card: DigitalCardResponse | null = null;
   isLoading = false;
   errorMessage: string | null = null;
+  maxVisibleSkills = 3;
+  visibleSkillCount = this.maxVisibleSkills;
 
   constructor(
     private digitalCardService: DigitalCardService,
@@ -320,30 +405,89 @@ export class MyCardsComponent implements OnInit {
     this.loadCard();
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => this.adjustSkillsToFit(), 0);
+  }
+
+  ngAfterViewChecked() {
+    setTimeout(() => this.adjustSkillsToFit(), 0);
+  }
+
+  adjustSkillsToFit() {
+    if (!this.skillsContainer || !this.card) return;
+    let count = this.maxVisibleSkills;
+    const el = this.skillsContainer.nativeElement;
+    while (count > 0) {
+      // Yetenekleri güncelle
+      this.visibleSkillCount = count;
+      // Angular'ın DOM'u güncellemesi için kısa bir bekleme
+      // (Bu kodda, bir sonraki tick'te tekrar kontrol edilecek)
+      if (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) {
+        count--;
+      } else {
+        break;
+      }
+    }
+    this.visibleSkillCount = count;
+  }
+
+  getInitials(fullName: string): string {
+    if (!fullName) return '';
+    return fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
+
+  getSocialIconClass(platform: string): string {
+    const p = platform ? platform.toLowerCase() : '';
+    if (p.includes('github')) return 'fab fa-github';
+    if (p.includes('linkedin')) return 'fab fa-linkedin';
+    if (p.includes('twitter')) return 'fab fa-twitter';
+    return 'fas fa-link';
+  }
+
+  getShortBiography(bio: string | undefined): string {
+    if (!bio) return '';
+    return bio.length > 120 ? bio.slice(0, 120) + '...' : bio;
+  }
+
+  getVisibleSkills(skills: string[], count: number = this.visibleSkillCount): string[] {
+    return skills ? skills.slice(0, count) : [];
+  }
+
+  getHiddenSkillsCount(skills: string[], count: number = this.visibleSkillCount): number {
+    return skills && skills.length > count ? skills.length - count : 0;
+  }
+
+  formatSkill(skill: string): string {
+    if (!skill) return '';
+    return skill.toLowerCase();
+  }
+
   loadCard(): void {
     this.isLoading = true;
     this.errorMessage = null;
 
-    const username = this.authService.getCurrentUsername();
-    if (!username) {
-      this.errorMessage = 'Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
-      this.isLoading = false;
-      return;
-    }
-
-    this.digitalCardService.getDigitalCard(username).subscribe({
-      next: (card: DigitalCardResponse) => {
-        this.card = card;
-        this.isLoading = false;
+    this.authService.getUserProfile().subscribe({
+      next: (profile) => {
+        this.digitalCardService.getDigitalCard(profile.username).subscribe({
+          next: (card: DigitalCardResponse) => {
+            this.card = card;
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Kart yüklenirken hata oluştu:', error);
+            if (error.status === 404) {
+              // Kart bulunamadıysa boş durumu göster
+              this.card = null;
+            } else {
+              this.errorMessage = 'Kartınız yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+            }
+            this.isLoading = false;
+          }
+        });
       },
       error: (error) => {
-        console.error('Kart yüklenirken hata oluştu:', error);
-        if (error.status === 404) {
-          // Kart bulunamadıysa boş durumu göster
-          this.card = null;
-        } else {
-          this.errorMessage = 'Kartınız yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
-        }
+        console.error('Kullanıcı profili yüklenirken hata oluştu:', error);
+        this.errorMessage = 'Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
         this.isLoading = false;
       }
     });

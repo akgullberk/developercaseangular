@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { CardListComponent } from '../card-list/card-list.component';
-import { AuthService } from '../../../auth/data/services/auth.service';
+import { CardListComponent } from '../digital-card/presentation/card-list/card-list.component';
+import { AuthService } from '../auth/data/services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -30,10 +30,10 @@ import { AuthService } from '../../../auth/data/services/auth.service';
 
       <section class="hero-section" *ngIf="authService.isLoggedIn()">
         <div class="hero-content">
-          <h1>Dijital Kartlarınızı <span class="highlight">Yönetin</span></h1>
-          <p>Dijital kartlarınızı görüntüleyin, düzenleyin ve yeni kartlar oluşturun</p>
+          <h1>Dijital Kartınızı <span class="highlight">Yönetin</span></h1>
+          <p>Dijital kartınızı görüntüleyin, düzenleyin</p>
           <button class="create-card-btn" routerLink="/my-cards">
-            <span>Dijital Kartlarım</span>
+            <span>Dijital Kartım</span>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M12 4L10.59 5.41L16.17 11H4V13H16.17L10.59 18.59L12 20L20 12L12 4Z" fill="currentColor"/>
             </svg>
@@ -61,4 +61,4 @@ import { AuthService } from '../../../auth/data/services/auth.service';
 })
 export class HomeComponent {
   constructor(public authService: AuthService) {}
-} 
+}

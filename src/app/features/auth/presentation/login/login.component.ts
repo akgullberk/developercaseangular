@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
-import { StorageService } from '../../../../core/services/storage.service';
+import { AuthService } from '../../data/services/auth.service';
+import { LoginRequest } from '../../domain/models/login-request.model';
 
 @Component({
   selector: 'app-login',
@@ -155,7 +155,6 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private storage: StorageService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -169,26 +168,16 @@ export class LoginComponent {
       this.isLoading = true;
       this.errorMessage = null;
 
-      const { username, password } = this.loginForm.value;
+      const loginRequest: LoginRequest = this.loginForm.value;
 
-      // Örnek login işlemi - gerçek uygulamada API'ye istek atılacak
-      setTimeout(() => {
-        // Başarılı login simülasyonu
-        const token = 'dummy-token-' + Math.random();
-        this.storage.setItem('token', token);
-        this.storage.setItem('username', username); // Username'i kaydet
-        
-        this.router.navigate(['/my-cards']);
-        this.isLoading = false;
-      }, 1000);
-
-      // Gerçek API entegrasyonu için:
-      /*
-      this.authService.login(username, password).subscribe({
+      this.authService.login(loginRequest).subscribe({
         next: (response) => {
-          this.storage.setItem('token', response.token);
-          this.storage.setItem('username', username);
-          this.router.navigate(['/my-cards']);
+          if (response.token) {
+            this.router.navigate(['/']);
+          } else {
+            this.errorMessage = 'Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edin.';
+          }
+          this.isLoading = false;
         },
         error: (error) => {
           console.error('Login hatası:', error);
@@ -196,7 +185,6 @@ export class LoginComponent {
           this.isLoading = false;
         }
       });
-      */
     }
   }
 } 

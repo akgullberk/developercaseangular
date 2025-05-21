@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/digital-card/presentation/home/home.component').then(m => m.HomeComponent)
+    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
   },
   {
     path: 'login',
@@ -16,17 +16,17 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/auth/presentation/profile/profile.component').then(m => m.ProfileComponent)
+    canActivate: [AuthGuard],
+    loadComponent: () => import('./features/profile/presentation/profile/profile.component').then(m => m.ProfileComponent)
   },
   {
     path: 'my-cards',
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     loadComponent: () => import('./features/digital-card/presentation/my-cards/my-cards.component').then(m => m.MyCardsComponent)
   },
   {
     path: 'create-card',
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     loadComponent: () => import('./features/digital-card/presentation/create-card/create-card.component').then(m => m.CreateCardComponent)
   }
 ];
