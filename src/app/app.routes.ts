@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { EditCardComponent } from './features/digital-card/presentation/edit-card/edit-card.component';
 
 export const routes: Routes = [
   {
@@ -28,5 +29,6 @@ export const routes: Routes = [
     path: 'create-card',
     canActivate: [AuthGuard],
     loadComponent: () => import('./features/digital-card/presentation/create-card/create-card.component').then(m => m.CreateCardComponent)
-  }
+  },
+  { path: 'edit-card', component: EditCardComponent },
 ];

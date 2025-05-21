@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { DigitalCardService, DigitalCardResponse } from '../../data/services/digital-card.service';
 import { AuthService } from '../../../auth/data/services/auth.service';
+import { CardItemComponent } from '../card-item/card-item.component';
+import { DigitalCard } from '../../domain/models/digital-card.model';
 
 @Component({
   selector: 'app-my-cards',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CardItemComponent],
   template: `
     <div class="my-cards-container">
       <div class="header">
@@ -18,31 +20,14 @@ import { AuthService } from '../../../auth/data/services/auth.service';
         </a>
       </div>
 
-      <div *ngIf="card" class="card-item custom-card">
-        <div class="card-header-row">
-          <div class="avatar">
-            <ng-container *ngIf="card.profilePhotoUrl && card.profilePhotoUrl !== ''; else initials">
-              <img [src]="card.profilePhotoUrl" alt="Avatar" (error)="card.profilePhotoUrl = ''" />
-            </ng-container>
-            <ng-template #initials>
-              <span>{{ getInitials(card.fullName) }}</span>
-            </ng-template>
-          </div>
-          <div class="social-icons">
-            <a *ngFor="let link of card.socialMediaLinks" [href]="link.url" target="_blank" [title]="link.customName || link.platform">
-              <i [ngClass]="getSocialIconClass(link.platform)"></i>
-            </a>
-          </div>
+      <ng-container *ngIf="card">
+        <app-card-item [card]="getCardItemData(card)" [maxSkills]="3"></app-card-item>
+        <div class="edit-btn-container">
+          <button class="edit-btn" (click)="goToEditCard()">
+            <i class="fas fa-edit"></i> Düzenle
+          </button>
         </div>
-        <div class="card-main-content">
-          <h3 class="fullname">{{ card.fullName }}</h3>
-          <p class="title">{{ card.title }}</p>
-          <p class="biography">{{ getShortBiography(card.biography) }}</p>
-          <div #skillsContainer class="skills">
-            <span *ngFor="let skill of getVisibleSkills(card.skills, 3)" class="skill-tag">{{ formatSkill(skill) }}</span>
-          </div>
-        </div>
-      </div>
+      </ng-container>
 
       <div *ngIf="!card && !isLoading" class="empty-state">
         <i class="fas fa-id-card"></i>
@@ -385,6 +370,31 @@ import { AuthService } from '../../../auth/data/services/auth.service';
       font-weight: 600;
       border: none;
     }
+    .edit-btn-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .edit-btn {
+      background: linear-gradient(90deg, #ff9800 0%, #ff6b00 100%);
+      color: #fff;
+      border: none;
+      padding: 0.7rem 2.2rem;
+      border-radius: 0.7rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(255, 107, 0, 0.12);
+    }
+    .edit-btn:hover {
+      background: linear-gradient(90deg, #ff6b00 0%, #ff9800 100%);
+      box-shadow: 0 4px 16px rgba(255, 107, 0, 0.18);
+      color: #fff;
+    }
   `]
 })
 export class MyCardsComponent implements OnInit, AfterViewInit {
@@ -505,5 +515,34 @@ export class MyCardsComponent implements OnInit, AfterViewInit {
         }
       });
     }
+  }
+
+  goToEditCard() {
+    this.router.navigate(['/edit-card']);
+  }
+
+  getCardItemData(card: DigitalCardResponse): DigitalCard {
+    // Sosyal medya linklerini uygun objeye çevir
+    const socialLinks: { [key: string]: string } = {};
+    if (card.socialMediaLinks) {
+      card.socialMediaLinks.forEach(link => {
+        let key = (link.platform || '').toLowerCase();
+        if (key.includes('blog')) key = 'blog';
+        if (key.includes('portfolio')) key = 'portfolio';
+        if (key.includes('medium')) key = 'medium';
+        if (key.includes('youtube')) key = 'youtube';
+        if (key.includes('facebook')) key = 'facebook';
+        socialLinks[key] = link.url;
+      });
+    }
+    return {
+      id: String(card.id),
+      fullName: card.fullName || '',
+      title: card.title || '',
+      profileImage: card.profilePhotoUrl || '',
+      biography: card.biography || '',
+      socialLinks,
+      skills: card.skills || []
+    };
   }
 } 
