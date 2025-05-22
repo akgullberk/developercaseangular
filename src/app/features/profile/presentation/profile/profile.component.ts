@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../../auth/data/services/auth.service';
 import { finalize } from 'rxjs/operators';
+import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/data/services/digital-card.service';
 
 @Component({
   selector: 'app-profile',
@@ -42,32 +43,6 @@ import { finalize } from 'rxjs/operators';
                 class="readonly-input"
               >
             </div>
-
-            <div class="form-group">
-              <label for="name">Ad</label>
-              <input
-                type="text"
-                id="name"
-                formControlName="name"
-                placeholder="Adınız"
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="surname">Soyad</label>
-              <input
-                type="text"
-                id="surname"
-                formControlName="surname"
-                placeholder="Soyadınız"
-              >
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="save-btn" [disabled]="!profileForm.valid || isLoading">
-              {{ isLoading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet' }}
-            </button>
           </div>
         </form>
 
@@ -178,32 +153,6 @@ import { finalize } from 'rxjs/operators';
 
             &[readonly] {
               background: #F7FAFC;
-              cursor: not-allowed;
-            }
-          }
-        }
-
-        .form-actions {
-          margin-top: 2rem;
-
-          .save-btn {
-            width: 100%;
-            padding: 1rem;
-            background: #FF6B00;
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-
-            &:hover:not(:disabled) {
-              transform: translateY(-2px);
-              box-shadow: 0 4px 12px rgba(255, 107, 0, 0.2);
-            }
-
-            &:disabled {
-              background: #CBD5E0;
               cursor: not-allowed;
             }
           }
@@ -326,10 +275,12 @@ export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   isLoading = false;
   userProfile: UserProfile | null = null;
+  digitalCard: DigitalCardResponse | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private digitalCardService: DigitalCardService
   ) {
     this.profileForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -339,6 +290,7 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserProfile();
+    this.loadDigitalCardFullName();
   }
 
   loadUserProfile(): void {
@@ -362,12 +314,26 @@ export class ProfileComponent implements OnInit {
       });
   }
 
+  loadDigitalCardFullName(): void {
+    this.authService.getUserProfile().subscribe(profile => {
+      this.digitalCardService.getDigitalCard(profile.username).subscribe(card => {
+        this.digitalCard = card;
+      });
+    });
+  }
+
   getInitials(): string {
+    if (this.digitalCard) {
+      return this.digitalCard.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
     if (!this.userProfile) return '';
     return `${this.userProfile.name[0]}${this.userProfile.surname[0]}`.toUpperCase();
   }
 
   getFullName(): string {
+    if (this.digitalCard) {
+      return this.digitalCard.fullName;
+    }
     if (!this.userProfile) return '';
     return `${this.userProfile.name} ${this.userProfile.surname}`;
   }

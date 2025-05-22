@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { DigitalCardService, DigitalCardRequest, SocialMediaLink } from '../../data/services/digital-card.service';
+import { FileUploadService } from '../../data/services/file-upload.service';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -50,13 +51,21 @@ import { finalize } from 'rxjs/operators';
           </div>
 
           <div class="form-group">
-            <label for="profileImage">Profil Fotoğrafı URL</label>
-            <input 
-              type="text" 
-              id="profileImage" 
-              formControlName="profileImage"
-              placeholder="Profil fotoğrafınızın URL'si"
-            >
+            <label for="profileImage">Profil Fotoğrafı</label>
+            <div class="file-upload-container">
+              <input
+                type="file"
+                id="profileImage"
+                #fileInput
+                (change)="onFileSelected($event)"
+                accept="image/*"
+                style="display: none"
+              >
+              <button type="button" class="file-upload-btn" (click)="fileInput.click()">
+                <i class="fas fa-upload"></i> Profil Fotoğrafı Seç
+              </button>
+              <span class="file-name">{{ selectedFileName || 'Dosya seçilmedi' }}</span>
+            </div>
           </div>
 
           <div class="social-links">
@@ -323,16 +332,51 @@ import { finalize } from 'rxjs/operators';
       margin-bottom: 1.5rem;
       white-space: pre-line;
     }
+
+    .file-upload-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .file-upload-btn {
+      background: #FF6B00;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #E65A00;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    .file-name {
+      color: #718096;
+      font-size: 0.9rem;
+    }
   `]
 })
 export class CreateCardComponent {
   cardForm: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
+  selectedFileName: string | null = null;
+  selectedFile: File | null = null;
 
   constructor(
     private fb: FormBuilder,
     private digitalCardService: DigitalCardService,
+    private fileUploadService: FileUploadService,
     private router: Router
   ) {
     this.cardForm = this.fb.group({
@@ -422,51 +466,86 @@ export class CreateCardComponent {
       .filter((skill: string) => skill.length >= 2 && skill.length <= 50);
   }
 
-  onSubmit() {
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      // Dosya türü kontrolü
+      if (!file.type.startsWith('image/')) {
+        this.errorMessage = 'Lütfen geçerli bir resim dosyası seçin (JPG, JPEG, PNG veya GIF)';
+        return;
+      }
+      this.selectedFile = file;
+      this.selectedFileName = file.name;
+    }
+  }
+
+  private async uploadProfilePhoto(): Promise<string | null> {
+    if (!this.selectedFile) return null;
+    
+    try {
+      const response = await this.fileUploadService.uploadProfilePhoto(this.selectedFile).toPromise();
+      return response.fileUrl;
+    } catch (error) {
+      console.error('Profil fotoğrafı yüklenirken hata:', error);
+      throw new Error('Profil fotoğrafı yüklenemedi');
+    }
+  }
+
+  async onSubmit() {
     if (this.cardForm.valid) {
       this.isLoading = true;
       this.errorMessage = null;
 
-      const formValue = this.cardForm.value;
-      const cardData: DigitalCardRequest = {
-        fullName: formValue.fullName,
-        profilePhotoUrl: formValue.profileImage || undefined,
-        title: formValue.title,
-        biography: formValue.biography,
-        socialMediaLinks: this.prepareSocialMediaLinks(),
-        skills: this.prepareSkills()
-      };
+      try {
+        let profilePhotoUrl = null;
+        if (this.selectedFile) {
+          profilePhotoUrl = await this.uploadProfilePhoto();
+        }
 
-      console.log('Gönderilecek veri:', cardData); // Debug için
+        const formValue = this.cardForm.value;
+        const cardData: DigitalCardRequest = {
+          fullName: formValue.fullName,
+          profilePhotoUrl: profilePhotoUrl || undefined,
+          title: formValue.title,
+          biography: formValue.biography,
+          socialMediaLinks: this.prepareSocialMediaLinks(),
+          skills: this.prepareSkills()
+        };
 
-      this.digitalCardService.createDigitalCard(cardData)
-        .pipe(
-          finalize(() => this.isLoading = false)
-        )
-        .subscribe({
-          next: (response) => {
-            console.log('Kart başarıyla oluşturuldu:', response);
-            this.router.navigate(['/my-cards']);
-          },
-          error: (error) => {
-            console.error('Kart oluşturulurken hata:', error);
-            if (error.error) {
-              if (typeof error.error === 'object') {
-                // Backend'den gelen validasyon hatalarını işle
-                const errorMessages = Object.entries(error.error)
-                  .map(([field, message]) => `${field}: ${message}`)
-                  .join('\n');
-                this.errorMessage = errorMessages;
-              } else if (typeof error.error === 'string') {
-                this.errorMessage = error.error;
+        console.log('Gönderilecek veri:', cardData);
+
+        this.digitalCardService.createDigitalCard(cardData)
+          .pipe(
+            finalize(() => this.isLoading = false)
+          )
+          .subscribe({
+            next: (response) => {
+              console.log('Kart başarıyla oluşturuldu:', response);
+              this.router.navigate(['/my-cards']);
+            },
+            error: (error) => {
+              console.error('Kart oluşturulurken hata:', error);
+              if (error.error) {
+                if (typeof error.error === 'object') {
+                  const errorMessages = Object.entries(error.error)
+                    .map(([field, message]) => `${field}: ${message}`)
+                    .join('\n');
+                  this.errorMessage = errorMessages;
+                } else if (typeof error.error === 'string') {
+                  this.errorMessage = error.error;
+                } else {
+                  this.errorMessage = 'Kart oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
+                }
               } else {
-                this.errorMessage = 'Kart oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
+                this.errorMessage = 'Sunucu ile iletişim kurulamadı. Lütfen daha sonra tekrar deneyin.';
               }
-            } else {
-              this.errorMessage = 'Sunucu ile iletişim kurulamadı. Lütfen daha sonra tekrar deneyin.';
             }
-          }
-        });
+          });
+      } catch (error: any) {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Beklenmeyen bir hata oluştu';
+      }
     } else {
       this.markFormGroupTouched(this.cardForm);
       this.errorMessage = 'Lütfen tüm zorunlu alanları doldurun ve geçerli değerler girin.';

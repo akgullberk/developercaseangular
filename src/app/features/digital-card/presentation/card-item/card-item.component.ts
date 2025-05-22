@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DigitalCard as BaseDigitalCard } from '../../domain/models/digital-card.model';
+import { environment } from '../../../../../environments/environment';
 
 export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
   socialLinks: { [key: string]: string };
@@ -15,7 +16,7 @@ export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
       <div class="card-header-row">
         <div class="avatar">
           <ng-container *ngIf="card.profileImage && card.profileImage !== ''; else initials">
-            <img [src]="card.profileImage" alt="Avatar" (error)="card.profileImage = ''" />
+            <img [src]="getProfileImageUrl(card.profileImage)" alt="Avatar" (error)="card.profileImage = ''" />
           </ng-container>
           <ng-template #initials>
             <span>{{ getInitials(card.fullName) }}</span>
@@ -143,6 +144,12 @@ export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
 export class CardItemComponent {
   @Input() card!: DigitalCard;
   @Input() maxSkills?: number;
+
+  getProfileImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return `${environment.serverUrl}${imageUrl}`;
+  }
 
   getInitials(fullName: string): string {
     if (!fullName) return '';
