@@ -5,6 +5,9 @@ import { DigitalCardService, DigitalCardResponse, SocialMediaLink } from '../../
 import { AuthService } from '../../../auth/data/services/auth.service';
 import { CardItemComponent } from '../card-item/card-item.component';
 import { DigitalCard } from '../../domain/models/digital-card.model';
+import { FileUploadService } from '../../data/services/file-upload.service';
+import { finalize } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-edit-card',
@@ -27,8 +30,21 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
           <textarea id="biography" formControlName="biography"></textarea>
         </div>
         <div class="form-group">
-          <label for="profilePhotoUrl">Profil Fotoğrafı URL</label>
-          <input id="profilePhotoUrl" formControlName="profilePhotoUrl" type="text" />
+          <label for="profileImage">Profil Fotoğrafı</label>
+          <div class="file-upload-container">
+            <input
+              type="file"
+              id="profileImage"
+              #fileInput
+              (change)="onFileSelected($event)"
+              accept="image/*"
+              style="display: none"
+            >
+            <button type="button" class="file-upload-btn" (click)="fileInput.click()">
+              <i class="fas fa-upload"></i> Profil Fotoğrafı Seç
+            </button>
+            <span class="file-name">{{ selectedFileName || 'Dosya seçilmedi' }}</span>
+          </div>
         </div>
         <div class="social-links">
           <h3>Sosyal Medya Bağlantıları</h3>
@@ -74,7 +90,9 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
           </div>
         </div>
         <div style="grid-column: 1 / -1;">
-          <button type="submit" [disabled]="!editForm.valid" style="width: 100%;">Kaydet</button>
+          <button type="submit" [disabled]="!editForm.valid || isLoading" style="width: 100%;">
+            {{ isLoading ? 'Kaydediliyor...' : 'Kaydet' }}
+          </button>
         </div>
       </form>
     </div>
@@ -214,6 +232,38 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
         padding: 0.5rem;
       }
     }
+
+    .file-upload-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .file-upload-btn {
+      background: #FF6B00;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #E65A00;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    .file-name {
+      color: #718096;
+      font-size: 0.9rem;
+    }
   `]
 })
 export class EditCardComponent implements OnInit {
@@ -227,21 +277,21 @@ export class EditCardComponent implements OnInit {
     socialLinks: {},
     skills: []
   };
-
-  get additionalLinks(): FormArray {
-    return this.editForm.get('additionalLinks') as FormArray;
-  }
+  isLoading = false;
+  selectedFileName: string | null = null;
+  selectedFile: File | null = null;
 
   constructor(
     private fb: FormBuilder,
     private digitalCardService: DigitalCardService,
-    private authService: AuthService
+    private fileUploadService: FileUploadService,
+    private authService: AuthService,
+    private router: Router
   ) {
     this.editForm = this.fb.group({
       fullName: ['', Validators.required],
       title: ['', Validators.required],
       biography: [''],
-      profilePhotoUrl: [''],
       github: [''],
       linkedin: [''],
       twitter: [''],
@@ -254,6 +304,59 @@ export class EditCardComponent implements OnInit {
     this.editForm.valueChanges.subscribe(formValue => {
       this.updatePreviewCard(formValue);
     });
+  }
+
+  get additionalLinks() {
+    return this.editForm.get('additionalLinks') as FormArray;
+  }
+
+  addLink() {
+    const linkGroup = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      url: ['', [Validators.required, Validators.pattern('https?://.+'), Validators.maxLength(500)]]
+    });
+
+    this.additionalLinks.push(linkGroup);
+  }
+
+  removeLink(index: number) {
+    this.additionalLinks.removeAt(index);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      // Dosya türü kontrolü
+      if (!file.type.startsWith('image/')) {
+        alert('Lütfen geçerli bir resim dosyası seçin (JPG, JPEG, PNG veya GIF)');
+        return;
+      }
+      this.selectedFile = file;
+      this.selectedFileName = file.name;
+      
+      // Önizleme için dosyayı URL'e çevir
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewCardData = {
+          ...this.previewCardData,
+          profileImage: reader.result as string
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  private async uploadProfilePhoto(): Promise<string | null> {
+    if (!this.selectedFile) return null;
+    
+    try {
+      const response = await this.fileUploadService.uploadProfilePhoto(this.selectedFile).toPromise();
+      return response.fileUrl;
+    } catch (error) {
+      console.error('Profil fotoğrafı yüklenirken hata:', error);
+      throw new Error('Profil fotoğrafı yüklenemedi');
+    }
   }
 
   ngOnInit(): void {
@@ -279,105 +382,124 @@ export class EditCardComponent implements OnInit {
               fullName: card.fullName,
               title: card.title,
               biography: card.biography,
-              profilePhotoUrl: card.profilePhotoUrl || '',
               github,
               linkedin,
               twitter,
               instagram,
               skills: card.skills ? card.skills.join(', ') : ''
             });
+
+            // Profil fotoğrafını önizlemeye ekle
+            if (card.profilePhotoUrl) {
+              this.previewCardData = {
+                ...this.previewCardData,
+                profileImage: card.profilePhotoUrl
+              };
+            }
           }
         });
       }
     });
   }
 
-  addLink() {
-    this.additionalLinks.push(this.fb.group({ title: [''], url: [''] }));
-  }
-
-  removeLink(i: number) {
-    this.additionalLinks.removeAt(i);
-  }
-
-  onSubmit() {
-    if (this.editForm.invalid) return;
+  private prepareSocialMediaLinks(): SocialMediaLink[] {
+    const links: SocialMediaLink[] = [];
     const formValue = this.editForm.value;
-    // Sosyal medya linklerini oluştur
-    const socialMediaLinks: SocialMediaLink[] = [];
-    if (formValue.github) socialMediaLinks.push({ platform: 'github', url: formValue.github });
-    if (formValue.linkedin) socialMediaLinks.push({ platform: 'linkedin', url: formValue.linkedin });
-    if (formValue.twitter) socialMediaLinks.push({ platform: 'twitter', url: formValue.twitter });
-    if (formValue.instagram) socialMediaLinks.push({ platform: 'instagram', url: formValue.instagram });
-    if (formValue.additionalLinks && Array.isArray(formValue.additionalLinks)) {
-      formValue.additionalLinks.forEach((link: any) => {
-        if (link.title && link.url) {
-          socialMediaLinks.push({
-            platform: link.title,
-            url: link.url,
-            customName: link.title
-          });
-        }
+
+    // Standart sosyal medya bağlantıları
+    if (formValue.github) {
+      links.push({ 
+        platform: 'GITHUB', 
+        url: formValue.github,
+        customName: 'GitHub'
       });
     }
-    // Yetenekleri virgülle ayırıp diziye çevir
-    const skills = formValue.skills
-      ? formValue.skills.split(',').map((skill: string) => skill.trim()).filter(Boolean)
-      : [];
-    // Request objesini oluştur
-    const cardData = {
-      fullName: formValue.fullName,
-      profilePhotoUrl: formValue.profilePhotoUrl,
-      title: formValue.title,
-      biography: formValue.biography,
-      socialMediaLinks,
-      skills
-    };
-    this.digitalCardService.updateDigitalCard(cardData).subscribe({
-      next: (res) => {
-        alert('Dijital kart başarıyla güncellendi!');
-      },
-      error: (err) => {
-        alert('Bir hata oluştu: ' + (err?.error?.message || err.message || err));
+    if (formValue.linkedin) {
+      links.push({ 
+        platform: 'LINKEDIN', 
+        url: formValue.linkedin,
+        customName: 'LinkedIn'
+      });
+    }
+    if (formValue.twitter) {
+      links.push({ 
+        platform: 'TWITTER', 
+        url: formValue.twitter,
+        customName: 'Twitter'
+      });
+    }
+    if (formValue.instagram) {
+      links.push({ 
+        platform: 'INSTAGRAM', 
+        url: formValue.instagram,
+        customName: 'Instagram'
+      });
+    }
+
+    // Ek bağlantılar
+    formValue.additionalLinks?.forEach((link: any) => {
+      if (link.url && link.title) {
+        links.push({
+          platform: 'OTHER',
+          url: link.url,
+          customName: link.title
+        });
       }
     });
+
+    return links;
   }
 
-  private updatePreviewCard(formValue: any) {
-    const socialLinks: { [key: string]: string } = {
-      github: formValue.github || undefined,
-      linkedin: formValue.linkedin || undefined,
-      twitter: formValue.twitter || undefined,
-      instagram: formValue.instagram || undefined
-    };
+  private prepareSkills(): string[] {
+    const skillsString = this.editForm.get('skills')?.value || '';
+    return skillsString
+      .split(',')
+      .map((skill: string) => skill.trim())
+      .filter((skill: string) => skill.length >= 2 && skill.length <= 50);
+  }
 
-    // Ek linkleri ekle
-    if (formValue.additionalLinks && Array.isArray(formValue.additionalLinks)) {
-      formValue.additionalLinks.forEach((link: any) => {
-        let key = (link.title || '').toLowerCase();
-        if (key.includes('blog')) key = 'blog';
-        if (key.includes('portfolio')) key = 'portfolio';
-        if (key.includes('medium')) key = 'medium';
-        if (key.includes('youtube')) key = 'youtube';
-        if (key.includes('facebook')) key = 'facebook';
-        socialLinks[key] = link.url || '';
-      });
+  async onSubmit() {
+    if (this.editForm.valid) {
+      this.isLoading = true;
+
+      try {
+        let profilePhotoUrl = this.previewCardData.profileImage;
+        if (this.selectedFile) {
+          const uploadedUrl = await this.uploadProfilePhoto();
+          if (uploadedUrl) {
+            profilePhotoUrl = uploadedUrl;
+          }
+        }
+
+        const formValue = this.editForm.value;
+        const cardData = {
+          fullName: formValue.fullName,
+          profilePhotoUrl: profilePhotoUrl || undefined,
+          title: formValue.title,
+          biography: formValue.biography,
+          socialMediaLinks: this.prepareSocialMediaLinks(),
+          skills: this.prepareSkills()
+        };
+
+        this.digitalCardService.updateDigitalCard(cardData)
+          .pipe(
+            finalize(() => this.isLoading = false)
+          )
+          .subscribe({
+            next: (response) => {
+              alert('Kart başarıyla güncellendi!');
+              this.router.navigate(['/my-cards']);
+            },
+            error: (error) => {
+              console.error('Kart güncellenirken hata:', error);
+              alert('Kart güncellenirken bir hata oluştu: ' + (error?.error?.message || error.message || 'Bilinmeyen hata'));
+            }
+          });
+      } catch (error: any) {
+        this.isLoading = false;
+        alert('Beklenmeyen bir hata oluştu: ' + error.message);
+      }
     }
-
-    // Yetenekleri virgülle ayırıp diziye çevir
-    const skills = formValue.skills
-      ? formValue.skills.split(',').map((skill: string) => skill.trim()).filter(Boolean)
-      : [];
-
-    this.previewCardData = {
-      id: 'preview',
-      fullName: formValue.fullName || '',
-      title: formValue.title || '',
-      profileImage: formValue.profilePhotoUrl || '',
-      biography: formValue.biography || '',
-      socialLinks,
-      skills
-    };
   }
 
   onSkillsInput(event: Event) {
@@ -417,5 +539,41 @@ export class EditCardComponent implements OnInit {
     ) {
       event.preventDefault();
     }
+  }
+
+  private updatePreviewCard(formValue: any) {
+    const socialLinks: { [key: string]: string } = {
+      github: formValue.github || undefined,
+      linkedin: formValue.linkedin || undefined,
+      twitter: formValue.twitter || undefined,
+      instagram: formValue.instagram || undefined
+    };
+
+    // Ek linkleri ekle
+    if (formValue.additionalLinks && Array.isArray(formValue.additionalLinks)) {
+      formValue.additionalLinks.forEach((link: any) => {
+        let key = (link.title || '').toLowerCase();
+        if (key.includes('blog')) key = 'blog';
+        if (key.includes('portfolio')) key = 'portfolio';
+        if (key.includes('medium')) key = 'medium';
+        if (key.includes('youtube')) key = 'youtube';
+        if (key.includes('facebook')) key = 'facebook';
+        socialLinks[key] = link.url || '';
+      });
+    }
+
+    // Yetenekleri virgülle ayırıp diziye çevir
+    const skills = formValue.skills
+      ? formValue.skills.split(',').map((skill: string) => skill.trim()).filter(Boolean)
+      : [];
+
+    this.previewCardData = {
+      ...this.previewCardData,
+      fullName: formValue.fullName || '',
+      title: formValue.title || '',
+      biography: formValue.biography || '',
+      socialLinks,
+      skills
+    };
   }
 } 

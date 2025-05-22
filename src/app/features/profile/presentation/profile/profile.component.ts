@@ -48,8 +48,9 @@ import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/d
 
         <div class="profile-sidebar">
           <div class="profile-card">
-            <div class="profile-avatar">
-              <span>{{ getInitials() }}</span>
+            <div class="profile-avatar" [class.has-image]="hasProfileImage()">
+              <img *ngIf="hasProfileImage()" [src]="getProfileImage()" alt="Profil fotoğrafı">
+              <span *ngIf="!hasProfileImage()">{{ getInitials() }}</span>
             </div>
             <h3>{{ getFullName() }}</h3>
             <p>{{ userProfile?.email }}</p>
@@ -180,6 +181,26 @@ import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/d
             color: white;
             font-size: 2rem;
             font-weight: 500;
+            overflow: hidden;
+
+            &.has-image {
+              background: none;
+              border: 2px solid #FF6B00;
+            }
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            span {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 100%;
+            }
           }
 
           h3 {
@@ -320,6 +341,14 @@ export class ProfileComponent implements OnInit {
         this.digitalCard = card;
       });
     });
+  }
+
+  hasProfileImage(): boolean {
+    return !!this.digitalCard?.profilePhotoUrl;
+  }
+
+  getProfileImage(): string {
+    return this.digitalCard?.profilePhotoUrl || '';
   }
 
   getInitials(): string {

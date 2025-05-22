@@ -28,8 +28,8 @@ export class FileUploadService {
       map((response: any) => {
         // Backend'den gelen dosya yolunu tam URL'ye çeviriyoruz
         if (response && response.fileUrl) {
-          // /uploads/... yolunu /api/uploads/... olarak düzeltiyoruz
-          const fileUrl = response.fileUrl.replace('/uploads/', '/api/uploads/');
+          // /api prefix'ini kaldırıyoruz
+          const fileUrl = response.fileUrl;
           response.fileUrl = `${environment.serverUrl}${fileUrl}`;
         }
         return response;
