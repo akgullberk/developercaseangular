@@ -12,60 +12,76 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
   imports: [CommonModule, RouterModule, CardItemComponent],
   template: `
     <div class="my-cards-container">
-      <div class="header">
-        <h2>Dijital Kartlarım</h2>
-        <a routerLink="/create-card" class="create-btn" *ngIf="!card">
-          <i class="fas fa-plus"></i>
-          Yeni Kart Oluştur
-        </a>
-      </div>
+      <div class="content-wrapper">
+        <div class="content-center">
+          <div class="header" *ngIf="!card">
+            <a routerLink="/create-card" class="create-btn">
+              <i class="fas fa-plus"></i>
+              Yeni Kart Oluştur
+            </a>
+          </div>
 
-      <ng-container *ngIf="card">
-        <app-card-item [card]="getCardItemData(card)" [maxSkills]="3"></app-card-item>
-        <div class="edit-btn-container">
-          <button class="edit-btn" (click)="goToEditCard()">
-            <i class="fas fa-edit"></i> Düzenle
-          </button>
+          <ng-container *ngIf="card">
+            <app-card-item [card]="getCardItemData(card)" [maxSkills]="3"></app-card-item>
+            <div class="edit-btn-container">
+              <button class="edit-btn" (click)="goToEditCard()">
+                <i class="fas fa-edit"></i> Düzenle
+              </button>
+            </div>
+          </ng-container>
+
+          <div *ngIf="!card && !isLoading" class="empty-state">
+            <i class="fas fa-id-card"></i>
+            <h3>Henüz dijital kartınız yok</h3>
+            <p>İlk dijital kartınızı oluşturmak için "Yeni Kart Oluştur" butonuna tıklayın.</p>
+            <a routerLink="/create-card" class="create-btn">
+              <i class="fas fa-plus"></i>
+              Yeni Kart Oluştur
+            </a>
+          </div>
+
+          <div *ngIf="isLoading" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Kartınız yükleniyor...</p>
+          </div>
+
+          <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
         </div>
-      </ng-container>
-
-      <div *ngIf="!card && !isLoading" class="empty-state">
-        <i class="fas fa-id-card"></i>
-        <h3>Henüz dijital kartınız yok</h3>
-        <p>İlk dijital kartınızı oluşturmak için "Yeni Kart Oluştur" butonuna tıklayın.</p>
-        <a routerLink="/create-card" class="create-btn">
-          <i class="fas fa-plus"></i>
-          Yeni Kart Oluştur
-        </a>
-      </div>
-
-      <div *ngIf="isLoading" class="loading-state">
-        <i class="fas fa-spinner fa-spin"></i>
-        <p>Kartınız yükleniyor...</p>
-      </div>
-
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
       </div>
     </div>
   `,
   styles: [`
     .my-cards-container {
+      min-height: calc(100vh - 64px); /* viewport height - header height */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content-wrapper {
+      flex: 1;
       padding: 2rem;
       max-width: 1200px;
       margin: 0 auto;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .content-center {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
 
     .header {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      margin-bottom: 2rem;
-
-      h2 {
-        color: #2D3748;
-        margin: 0;
-      }
     }
 
     .create-btn {
@@ -235,6 +251,7 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
       background: white;
       border-radius: 1rem;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
 
       i {
         font-size: 4rem;
@@ -263,6 +280,7 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
       background: white;
       border-radius: 1rem;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
 
       i {
         font-size: 2rem;
@@ -281,8 +299,8 @@ import { DigitalCard } from '../../domain/models/digital-card.model';
       color: #DC2626;
       padding: 1rem;
       border-radius: 0.5rem;
-      margin-top: 1.5rem;
       text-align: center;
+      width: 100%;
     }
 
     .custom-card {

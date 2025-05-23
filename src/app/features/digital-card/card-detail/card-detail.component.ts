@@ -2,11 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DigitalCardService, CardWithProjectsDTO } from '../data/services/digital-card.service';
+import { AuthService } from '../../auth/data/services/auth.service';
+import { ContactService, ContactFormData } from '../data/services/contact.service';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-card-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
     <div class="card-detail-container" *ngIf="cardData">
       <!-- Hero Section -->
@@ -17,6 +20,10 @@ import { DigitalCardService, CardWithProjectsDTO } from '../data/services/digita
           </div>
           <h1>{{ cardData.digitalCard.fullName }}</h1>
           <p class="title">{{ cardData.digitalCard.title }}</p>
+          <button class="contact-btn" (click)="showContactForm = true">
+            <i class="fas fa-envelope"></i>
+            Bana Ulaş
+          </button>
         </div>
       </div>
 
@@ -81,11 +88,89 @@ import { DigitalCardService, CardWithProjectsDTO } from '../data/services/digita
           </div>
         </section>
       </div>
+
+      <!-- Contact Form Modal -->
+      <div class="modal-overlay" *ngIf="showContactForm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>İletişim Formu</h3>
+            <button class="close-btn" (click)="showContactForm = false">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+            <div class="form-group">
+              <label for="name">İsim</label>
+              <input type="text" id="name" formControlName="name" placeholder="Adınız">
+              <div class="error-message" *ngIf="contactForm.get('name')?.errors?.['required'] && contactForm.get('name')?.touched">
+                İsim alanı zorunludur
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">E-posta</label>
+              <input type="email" id="email" formControlName="email" placeholder="E-posta adresiniz">
+              <div class="error-message" *ngIf="contactForm.get('email')?.errors?.['required'] && contactForm.get('email')?.touched">
+                E-posta alanı zorunludur
+              </div>
+              <div class="error-message" *ngIf="contactForm.get('email')?.errors?.['email'] && contactForm.get('email')?.touched">
+                Geçerli bir e-posta adresi giriniz
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="subject">Konu</label>
+              <input type="text" id="subject" formControlName="subject" placeholder="Mesajınızın konusu">
+              <div class="error-message" *ngIf="contactForm.get('subject')?.errors?.['required'] && contactForm.get('subject')?.touched">
+                Konu alanı zorunludur
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="message">Mesaj</label>
+              <textarea id="message" formControlName="message" rows="5" placeholder="Mesajınız"></textarea>
+              <div class="error-message" *ngIf="contactForm.get('message')?.errors?.['required'] && contactForm.get('message')?.touched">
+                Mesaj alanı zorunludur
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" (click)="showContactForm = false">İptal</button>
+              <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || isSubmitting">
+                <span *ngIf="!isSubmitting">Gönder</span>
+                <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Success Message Modal -->
+      <div class="modal-overlay" *ngIf="showSuccessMessage">
+        <div class="modal-content success-message">
+          <i class="fas fa-check-circle"></i>
+          <h3>Mesajınız Gönderildi!</h3>
+          <p>İletişime geçtiğiniz için teşekkür ederiz.</p>
+          <button class="ok-btn" (click)="showSuccessMessage = false">Tamam</button>
+        </div>
+      </div>
     </div>
 
     <div class="loading-container" *ngIf="!cardData">
       <div class="loading-spinner"></div>
       <p>Kart detayları yükleniyor...</p>
+    </div>
+
+    <!-- Giriş Yapma Uyarısı Modal -->
+    <div class="login-alert" *ngIf="showLoginAlert">
+      <div class="login-alert-content">
+        <h3>Giriş Yapmanız Gerekiyor</h3>
+        <p>Projeyi incelemek için lütfen giriş yapın.</p>
+        <div class="login-alert-actions">
+          <button class="cancel-btn" (click)="showLoginAlert = false">İptal</button>
+          <button class="login-btn" (click)="goToLogin()">Giriş Yap</button>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -376,16 +461,289 @@ import { DigitalCardService, CardWithProjectsDTO } from '../data/services/digita
         }
       }
     }
+
+    .login-alert {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .login-alert-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+
+      h3 {
+        color: #2D3748;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: #4A5568;
+        margin-bottom: 1.5rem;
+      }
+    }
+
+    .login-alert-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+
+      button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .cancel-btn {
+        background: #EDF2F7;
+        color: #4A5568;
+        border: none;
+
+        &:hover {
+          background: #E2E8F0;
+        }
+      }
+
+      .login-btn {
+        background: #FF6B00;
+        color: white;
+        border: none;
+
+        &:hover {
+          background: #E65C00;
+        }
+      }
+    }
+
+    .contact-btn {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #FF6B00;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        background: #FF6B00;
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      i {
+        font-size: 1.1rem;
+      }
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+
+      h3 {
+        color: #2D3748;
+        margin: 0;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: #718096;
+        cursor: pointer;
+        font-size: 1.25rem;
+        padding: 0.5rem;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #2D3748;
+        }
+      }
+    }
+
+    .contact-form {
+      .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          color: #4A5568;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+        }
+
+        input, textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #E2E8F0;
+          border-radius: 0.5rem;
+          font-size: 1rem;
+          transition: all 0.2s;
+
+          &:focus {
+            outline: none;
+            border-color: #FF6B00;
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+          }
+        }
+
+        textarea {
+          resize: vertical;
+        }
+
+        .error-message {
+          color: #E53E3E;
+          font-size: 0.875rem;
+          margin-top: 0.5rem;
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+
+      button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
+
+      .cancel-btn {
+        background: #EDF2F7;
+        color: #4A5568;
+        border: none;
+
+        &:hover:not(:disabled) {
+          background: #E2E8F0;
+        }
+      }
+
+      .submit-btn {
+        background: #FF6B00;
+        color: white;
+        border: none;
+
+        &:hover:not(:disabled) {
+          background: #E65C00;
+        }
+      }
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 3rem 2rem;
+
+      i {
+        font-size: 4rem;
+        color: #48BB78;
+        margin-bottom: 1.5rem;
+      }
+
+      h3 {
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #718096;
+        margin-bottom: 2rem;
+      }
+
+      .ok-btn {
+        background: #48BB78;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #38A169;
+        }
+      }
+    }
   `]
 })
 export class CardDetailComponent implements OnInit {
   cardData: CardWithProjectsDTO | null = null;
+  showLoginAlert = false;
+  showContactForm = false;
+  showSuccessMessage = false;
+  isSubmitting = false;
+  contactForm: FormGroup;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private digitalCardService: DigitalCardService
-  ) {}
+    private digitalCardService: DigitalCardService,
+    private authService: AuthService,
+    private contactService: ContactService,
+    private fb: FormBuilder
+  ) {
+    this.contactForm = this.fb.group({
+      name: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      subject: ['', [Validators.required]],
+      message: ['', [Validators.required]]
+    });
+  }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -436,6 +794,39 @@ export class CardDetailComponent implements OnInit {
   }
 
   viewProject(projectId: number): void {
-    this.router.navigate(['/project', projectId]);
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginAlert = true;
+    } else {
+      this.router.navigate(['/project', projectId]);
+    }
+  }
+
+  goToLogin(): void {
+    this.showLoginAlert = false;
+    this.router.navigate(['/login']);
+  }
+
+  onSubmit(): void {
+    if (this.contactForm.valid && this.cardData) {
+      this.isSubmitting = true;
+      const formData: ContactFormData = {
+        ...this.contactForm.value,
+        recipientUsername: this.cardData.digitalCard.username
+      };
+
+      this.contactService.sendContactForm(formData).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.showContactForm = false;
+          this.showSuccessMessage = true;
+          this.contactForm.reset();
+        },
+        error: (error) => {
+          this.isSubmitting = false;
+          console.error('İletişim formu gönderilirken hata:', error);
+          // Hata mesajı gösterilebilir
+        }
+      });
+    }
   }
 } 

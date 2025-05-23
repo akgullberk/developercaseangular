@@ -87,10 +87,12 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
+      margin-top: 64px; /* Top bar yüksekliği kadar margin */
 
       .profile-header {
         text-align: center;
         margin-bottom: 3rem;
+        padding-top: 2rem; /* Ek padding */
 
         h1 {
           font-size: 2.5rem;
@@ -276,9 +278,11 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     @media (max-width: 768px) {
       .profile-container {
         padding: 1rem;
+        margin-top: 56px; /* Mobilde top bar daha alçak olabilir */
 
         .profile-header {
           margin-bottom: 2rem;
+          padding-top: 1.5rem;
 
           h1 {
             font-size: 2rem;
