@@ -5,11 +5,12 @@ import { RouterModule, Router } from '@angular/router';
 import { DigitalCardService, DigitalCardRequest, SocialMediaLink } from '../../data/services/digital-card.service';
 import { FileUploadService } from '../../data/services/file-upload.service';
 import { finalize } from 'rxjs/operators';
+import { ImageCropperModule, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 
 @Component({
   selector: 'app-create-card',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ImageCropperModule],
   template: `
     <div class="create-card-container">
       <div class="create-card-content">
@@ -65,6 +66,9 @@ import { finalize } from 'rxjs/operators';
                 <i class="fas fa-upload"></i> Profil Fotoğrafı Seç
               </button>
               <span class="file-name">{{ selectedFileName || 'Dosya seçilmedi' }}</span>
+            </div>
+            <div *ngIf="previewImageUrl" class="image-preview">
+              <img [src]="previewImageUrl" alt="Profil fotoğrafı önizleme">
             </div>
           </div>
 
@@ -161,6 +165,35 @@ import { finalize } from 'rxjs/operators';
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Resim Kırpma Modalı -->
+    <div class="modal" *ngIf="showCropper">
+      <div class="modal-content">
+        <h2>Profil Fotoğrafını Düzenle</h2>
+        <image-cropper
+          [imageFile]="imageChangedEvent?.target?.files[0]"
+          [maintainAspectRatio]="true"
+          [aspectRatio]="1"
+          [roundCropper]="true"
+          [onlyScaleDown]="true"
+          [alignImage]="'center'"
+          format="png"
+          outputType="base64"
+          [resizeToWidth]="300"
+          [resizeToHeight]="300"
+          [cropperMinWidth]="100"
+          [cropperMinHeight]="100"
+          (imageCropped)="imageCropped($event)"
+          (imageLoaded)="imageLoaded($event)"
+          (loadImageFailed)="loadImageFailed()"
+          [containWithinAspectRatio]="true"
+        ></image-cropper>
+        <div class="modal-buttons">
+          <button type="button" class="cancel-btn" (click)="cancelCropping()">İptal</button>
+          <button type="button" class="save-btn" (click)="saveCroppedImage()">Kaydet</button>
+        </div>
       </div>
     </div>
   `,
@@ -364,6 +397,83 @@ import { finalize } from 'rxjs/operators';
       color: #718096;
       font-size: 0.9rem;
     }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+
+      h2 {
+        color: #2D3748;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+
+        button {
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &.cancel-btn {
+            background: transparent;
+            border: 2px solid #FF6B00;
+            color: #FF6B00;
+
+            &:hover {
+              background: rgba(255, 107, 0, 0.1);
+            }
+          }
+
+          &.save-btn {
+            background: #FF6B00;
+            border: none;
+            color: white;
+
+            &:hover {
+              background: #E65A00;
+            }
+          }
+        }
+      }
+    }
+
+    .image-preview {
+      margin-top: 1rem;
+      text-align: center;
+
+      img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 50%;
+        border: 2px solid #FF6B00;
+        object-fit: cover;
+      }
+    }
   `]
 })
 export class CreateCardComponent {
@@ -372,6 +482,10 @@ export class CreateCardComponent {
   errorMessage: string | null = null;
   selectedFileName: string | null = null;
   selectedFile: File | null = null;
+  previewImageUrl: string | null = null;
+  showCropper = false;
+  imageChangedEvent: any = null;
+  croppedImage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -466,17 +580,128 @@ export class CreateCardComponent {
       .filter((skill: string) => skill.length >= 2 && skill.length <= 50);
   }
 
-  onFileSelected(event: Event) {
+  onFileSelected(event: Event): void {
+    this.imageChangedEvent = null;
+    this.croppedImage = null;
+    
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      // Dosya türü kontrolü
       if (!file.type.startsWith('image/')) {
-        this.errorMessage = 'Lütfen geçerli bir resim dosyası seçin (JPG, JPEG, PNG veya GIF)';
+        alert('Lütfen geçerli bir resim dosyası seçin (JPG, JPEG, PNG veya GIF)');
         return;
       }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Dosya boyutu 5MB\'dan küçük olmalıdır');
+        return;
+      }
+
+      this.imageChangedEvent = event;
+      this.showCropper = true;
+    }
+  }
+
+  imageCropped(event: ImageCroppedEvent): void {
+    console.log('Resim kırpma eventi tetiklendi:', event);
+    
+    if (event.objectUrl) {
+      // ObjectURL'i base64'e çevir
+      this.convertObjectUrlToBase64(event.objectUrl).then(base64 => {
+        this.croppedImage = base64;
+        this.previewImageUrl = this.croppedImage;
+        console.log('Resim base64 formatına dönüştürüldü');
+      });
+    } else if (event.base64) {
+      this.croppedImage = event.base64;
+      this.previewImageUrl = this.croppedImage;
+      console.log('Resim base64 formatında alındı');
+    } else {
+      console.error('Resimden base64 verisi alınamadı:', event);
+    }
+  }
+
+  private async convertObjectUrlToBase64(objectUrl: string): Promise<string> {
+    try {
+      const response = await fetch(objectUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('ObjectURL base64\'e dönüştürülürken hata:', error);
+      throw error;
+    }
+  }
+
+  imageLoaded(image: LoadedImage): void {
+    console.log('Resim yüklendi:', image);
+  }
+
+  loadImageFailed(): void {
+    console.error('Resim yükleme başarısız!');
+    alert('Resim yüklenirken bir hata oluştu!');
+    this.cancelCropping();
+  }
+
+  cancelCropping(): void {
+    this.showCropper = false;
+    this.imageChangedEvent = null;
+    this.croppedImage = null;
+    this.previewImageUrl = null;
+    this.selectedFile = null;
+    this.selectedFileName = null;
+  }
+
+  async saveCroppedImage(): Promise<void> {
+    console.log('Kaydet butonuna basıldı');
+    console.log('croppedImage durumu:', {
+      isDefined: !!this.croppedImage,
+      length: this.croppedImage?.length || 0
+    });
+
+    if (!this.croppedImage) {
+      console.error('croppedImage değişkeni boş!');
+      alert('Lütfen önce bir resim seçin ve kırpın!');
+      return;
+    }
+
+    try {
+      let base64Data = this.croppedImage;
+      
+      // Base64 verisi "data:image/..." ile başlıyorsa, sadece base64 kısmını al
+      const base64Prefix = 'base64,';
+      const base64Index = base64Data.indexOf(base64Prefix);
+      
+      if (base64Index !== -1) {
+        base64Data = base64Data.substring(base64Index + base64Prefix.length);
+      }
+
+      // Base64'ü Blob'a çevir
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/png' });
+      
+      // Blob'dan File oluştur
+      const file = new File([blob], 'profile.png', { type: 'image/png' });
+      
       this.selectedFile = file;
-      this.selectedFileName = file.name;
+      this.selectedFileName = 'Kırpılmış resim.png';
+      this.showCropper = false;
+      
+      console.log('Resim başarıyla kaydedildi');
+    } catch (error) {
+      console.error('Resim kaydedilirken hata:', error);
+      alert('Resim kaydedilirken bir hata oluştu!');
     }
   }
 

@@ -22,15 +22,19 @@ export class FileUploadService {
     const formData = new FormData();
     formData.append('file', file);
 
+    // Content-Type header'ı otomatik olarak ayarlanacak
+    const headers = this.getHeaders();
+
     return this.http.post(`${this.baseUrl}/upload/profile-photo`, formData, {
-      headers: this.getHeaders()
+      headers: headers
     }).pipe(
       map((response: any) => {
-        // Backend'den gelen dosya yolunu tam URL'ye çeviriyoruz
+        console.log('Upload response:', response);
         if (response && response.fileUrl) {
           // /api prefix'ini kaldırıyoruz
-          const fileUrl = response.fileUrl;
+          const fileUrl = response.fileUrl.replace('/api/', '/');
           response.fileUrl = `${environment.serverUrl}${fileUrl}`;
+          console.log('Modified file URL:', response.fileUrl);
         }
         return response;
       })

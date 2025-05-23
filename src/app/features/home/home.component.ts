@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { CardListComponent } from '../digital-card/presentation/card-list/card-list.component';
 import { AuthService } from '../auth/data/services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardListComponent],
+  imports: [CommonModule, RouterModule],
   template: `
     <main class="main-content">
       <section class="hero-section" *ngIf="!authService.isLoggedIn()">
@@ -32,12 +31,20 @@ import { AuthService } from '../auth/data/services/auth.service';
         <div class="hero-content">
           <h1>Dijital Kartınızı <span class="highlight">Yönetin</span></h1>
           <p>Dijital kartınızı görüntüleyin, düzenleyin</p>
-          <button class="create-card-btn" routerLink="/my-cards">
-            <span>Dijital Kartım</span>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 4L10.59 5.41L16.17 11H4V13H16.17L10.59 18.59L12 20L20 12L12 4Z" fill="currentColor"/>
-            </svg>
-          </button>
+          <div class="button-group">
+            <button class="create-card-btn" routerLink="/my-cards">
+              <span>Dijital Kartım</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 4L10.59 5.41L16.17 11H4V13H16.17L10.59 18.59L12 20L20 12L12 4Z" fill="currentColor"/>
+              </svg>
+            </button>
+            <button class="show-all-cards-btn" routerLink="/all-cards">
+              <span>Tüm Kartları Göster</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M4 6H2V20C2 21.1 2.9 22 4 22H18V20H4V6ZM20 2H8C6.9 2 6 2.9 6 4V16C6 17.1 6.9 18 8 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H8V4H20V16ZM13 14H15V11H18V9H15V6H13V9H10V11H13V14Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="hero-background">
           <div class="gradient-circle circle-1"></div>
@@ -52,7 +59,7 @@ import { AuthService } from '../auth/data/services/auth.service';
           <p>Öne çıkan profesyonellerin kartları</p>
         </div>
         <div class="cards-grid">
-          <app-card-list></app-card-list>
+
         </div>
       </section>
     </main>

@@ -2,8 +2,10 @@
   <nav class="navbar">
     <div class="nav-content">
       <div class="logo">
-        <img src="assets/images/logo.png" alt="Digital Card Logo">
-    </div>
+        <a routerLink="/">
+          <img src="assets/images/logo.svg" alt="Dijital Kart Logo">
+        </a>
+      </div>
       <div class="nav-buttons">
         <ng-container *ngIf="!authService.isLoggedIn(); else loggedInButtons">
           <button class="login-btn" routerLink="/login">Giriş Yap</button>

@@ -1,15 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../../auth/data/services/auth.service';
 import { finalize } from 'rxjs/operators';
-import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/data/services/digital-card.service';
+import { DigitalCardService, DigitalCardResponse, DigitalCardRequest } from '../../../digital-card/data/services/digital-card.service';
+import { ImageCropperModule, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
+import { FileUploadService } from '../../../digital-card/data/services/file-upload.service';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <div class="profile-container">
       <div class="profile-header">
@@ -64,6 +68,12 @@ import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/d
                 <a routerLink="/my-cards">
                   <i class="fas fa-id-card"></i>
                   Dijital Kartım
+                </a>
+              </li>
+              <li>
+                <a routerLink="/my-projects">
+                  <i class="fas fa-code-branch"></i>
+                  Projelerim
                 </a>
               </li>
             </ul>
@@ -182,6 +192,7 @@ import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/d
             font-size: 2rem;
             font-weight: 500;
             overflow: hidden;
+            position: relative;
 
             &.has-image {
               background: none;
@@ -330,7 +341,6 @@ export class ProfileComponent implements OnInit {
         },
         error: (error) => {
           console.error('Profil bilgileri yüklenirken hata oluştu:', error);
-          // TODO: Hata mesajı göster
         }
       });
   }
@@ -341,14 +351,6 @@ export class ProfileComponent implements OnInit {
         this.digitalCard = card;
       });
     });
-  }
-
-  hasProfileImage(): boolean {
-    return !!this.digitalCard?.profilePhotoUrl;
-  }
-
-  getProfileImage(): string {
-    return this.digitalCard?.profilePhotoUrl || '';
   }
 
   getInitials(): string {
@@ -367,6 +369,14 @@ export class ProfileComponent implements OnInit {
     return `${this.userProfile.name} ${this.userProfile.surname}`;
   }
 
+  hasProfileImage(): boolean {
+    return !!this.digitalCard?.profilePhotoUrl;
+  }
+
+  getProfileImage(): string {
+    return this.digitalCard?.profilePhotoUrl || '';
+  }
+
   onSubmit(): void {
     if (this.profileForm.valid) {
       this.isLoading = true;
@@ -382,11 +392,9 @@ export class ProfileComponent implements OnInit {
         .subscribe({
           next: (updatedProfile) => {
             this.userProfile = updatedProfile;
-            // TODO: Başarılı güncelleme mesajı göster
           },
           error: (error) => {
             console.error('Profil güncellenirken hata oluştu:', error);
-            // TODO: Hata mesajı göster
           }
         });
     }
