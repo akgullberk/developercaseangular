@@ -3,8 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StorageService } from '../../../../core/services/storage.service';
 import { environment } from '../../../../../environments/environment';
+import { map } from 'rxjs/operators';
 
-const API_URL = 'http://localhost:8081/api';
+const API_URL = 'http://16.170.205.160:8081/api';
 
 export interface SocialMediaLink {
   platform: string;
@@ -78,10 +79,19 @@ export class DigitalCardService {
     });
   }
 
+  private fixProfilePhotoUrl(card: any): any {
+    if (card && card.profilePhotoUrl && card.profilePhotoUrl.includes('localhost:8081')) {
+      card.profilePhotoUrl = card.profilePhotoUrl.replace('http://localhost:8081', environment.serverUrl);
+    }
+    return card;
+  }
+
   getCards(): Observable<DigitalCardResponse[]> {
     return this.http.get<DigitalCardResponse[]>(
       `${this.DIGITAL_CARDS_URL}/my-cards`,
       { headers: this.getHeaders() }
+    ).pipe(
+      map(cards => cards.map(card => this.fixProfilePhotoUrl(card)))
     );
   }
 
@@ -90,12 +100,16 @@ export class DigitalCardService {
       this.DIGITAL_CARDS_URL,
       cardData,
       { headers: this.getHeaders() }
+    ).pipe(
+      map(card => this.fixProfilePhotoUrl(card))
     );
   }
 
   getDigitalCard(username: string): Observable<DigitalCardResponse> {
     return this.http.get<DigitalCardResponse>(
       `${this.DIGITAL_CARDS_URL}/${username}`
+    ).pipe(
+      map(card => this.fixProfilePhotoUrl(card))
     );
   }
 
@@ -104,6 +118,8 @@ export class DigitalCardService {
       this.DIGITAL_CARDS_URL,
       cardData,
       { headers: this.getHeaders() }
+    ).pipe(
+      map(card => this.fixProfilePhotoUrl(card))
     );
   }
 
@@ -115,10 +131,19 @@ export class DigitalCardService {
   }
 
   getAllDigitalCards(): Observable<DigitalCardResponse[]> {
-    return this.http.get<DigitalCardResponse[]>(`${this.DIGITAL_CARDS_URL}/all`);
+    return this.http.get<DigitalCardResponse[]>(`${this.DIGITAL_CARDS_URL}/all`).pipe(
+      map(cards => cards.map(card => this.fixProfilePhotoUrl(card)))
+    );
   }
 
   getCardWithProjects(username: string): Observable<CardWithProjectsDTO> {
-    return this.http.get<CardWithProjectsDTO>(`${this.DIGITAL_CARDS_URL}/${username}/with-projects`);
+    return this.http.get<CardWithProjectsDTO>(`${this.DIGITAL_CARDS_URL}/${username}/with-projects`).pipe(
+      map(response => {
+        if (response.digitalCard) {
+          response.digitalCard = this.fixProfilePhotoUrl(response.digitalCard);
+        }
+        return response;
+      })
+    );
   }
 } 

@@ -6,9 +6,9 @@ import { throwError } from 'rxjs';
 import { LoginRequest } from '../../domain/models/login-request.model';
 import { RegisterRequest } from '../../domain/models/register-request.model';
 import { StorageService } from '../../../../core/services/storage.service';
+import { environment } from '../../../../../environments/environment';
 
-// Environment değişkenlerini doğrudan tanımlayalım
-const API_URL = 'http://localhost:8081/api';
+const API_URL = 'http://16.170.205.160:8081/api';
 
 export interface UserProfile {
   id: number;
@@ -25,8 +25,8 @@ export class AuthService {
   private readonly AUTH_URL = `${API_URL}/auth`;
 
   constructor(
-    private readonly http: HttpClient,
-    private readonly storage: StorageService
+    private http: HttpClient,
+    private storage: StorageService
   ) {}
 
   login(loginRequest: LoginRequest): Observable<any> {
