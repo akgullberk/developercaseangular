@@ -4,41 +4,50 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 128px);
+  min-height: calc(100vh - 8vh);
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 2rem 0;
-  margin-top: 64px;
+  padding: 3% 2%;
+  margin-top: 8vh;
+  margin-bottom: 0;
+  position: relative;
   
   .register-card {
     background: white;
-    padding: 2rem;
+    padding: 5%;
     border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    margin: 2rem 0;
+    box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 28rem;
+    margin: 2% 0;
+    
+    @media (min-width: 768px) {
+      width: 80%;
+      padding: 4%;
+    }
     
     h2 {
       text-align: center;
       color: #333;
-      margin-bottom: 2rem;
+      margin-bottom: 6%;
+      font-size: clamp(1.5rem, 4vw, 2rem);
     }
     
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 5%;
       
       label {
         display: block;
-        margin-bottom: 0.5rem;
+        margin-bottom: 2%;
         color: #666;
+        font-size: clamp(0.875rem, 2vw, 1rem);
       }
       
       input {
         width: 100%;
-        padding: 0.75rem;
+        padding: 3% 4%;
         border: 1px solid #ddd;
         border-radius: 0.5rem;
-        font-size: 1rem;
+        font-size: clamp(0.875rem, 2vw, 1rem);
         
         &.error {
           border-color: #ff6b6b;
@@ -47,35 +56,38 @@
       
       .error-message {
         color: #ff6b6b;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
+        font-size: clamp(0.75rem, 1.8vw, 0.875rem);
+        margin-top: 2%;
       }
     }
     
     button {
       width: 100%;
-      padding: 0.75rem;
+      padding: 3% 0;
       background-color: #FF6B00;
       color: white;
       border: none;
       border-radius: 0.5rem;
-      font-size: 1rem;
+      font-size: clamp(0.875rem, 2vw, 1rem);
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.3s ease;
       
       &:hover {
         background-color: color.adjust(#FF6B00, $lightness: -10%);
+        transform: translateY(-2px);
       }
       
       &:disabled {
         background-color: #ccc;
         cursor: not-allowed;
+        transform: none;
       }
     }
     
     .login-link {
       text-align: center;
-      margin-top: 1.5rem;
+      margin-top: 6%;
+      font-size: clamp(0.875rem, 2vw, 1rem);
       
       a {
         color: #FF6B00;
@@ -92,19 +104,55 @@
 .success-message {
   color: #2ecc71;
   background-color: #d5f5e3;
-  padding: 1rem;
+  padding: 3% 4%;
   border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 4%;
   text-align: center;
   font-weight: 500;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .error-message {
   color: #e74c3c;
   background-color: #fadbd8;
-  padding: 1rem;
+  padding: 3% 4%;
   border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 4%;
   text-align: center;
   font-weight: 500;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+// Mobil için ek düzenlemeler
+@media (max-width: 480px) {
+  .register-container {
+    padding: 4% 3%;
+    min-height: calc(100vh - 10vh);
+    
+    .register-card {
+      width: 95%;
+      padding: 6%;
+      margin: 0;
+      
+      .form-group {
+        margin-bottom: 6%;
+      }
+      
+      button {
+        padding: 4% 0;
+      }
+    }
+  }
+}
+
+// Tablet için ek düzenlemeler
+@media (min-width: 481px) and (max-width: 1024px) {
+  .register-container {
+    padding: 3%;
+    
+    .register-card {
+      width: 85%;
+      padding: 5%;
+    }
+  }
 } 

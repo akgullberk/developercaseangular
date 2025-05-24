@@ -44,9 +44,9 @@ import { ProjectService, ProjectDTO } from '../../data/services/project.service'
               <i class="fas fa-edit"></i>
               Düzenle
             </a>
-            <button class="project-link" (click)="viewProject(project.id)">
-              <i class="fas fa-external-link-alt"></i>
-              Projeyi İncele
+            <button class="delete-button" (click)="deleteProject(project.id)">
+              <i class="fas fa-trash"></i>
+              Sil
             </button>
           </div>
         </div>
@@ -58,11 +58,14 @@ import { ProjectService, ProjectDTO } from '../../data/services/project.service'
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
+      min-height: calc(100vh - 64px);
     }
 
     .projects-header {
       text-align: center;
       margin-bottom: 3rem;
+      margin-top: 4rem;
+      flex-shrink: 0;
 
       h1 {
         font-size: 2.5rem;
@@ -80,6 +83,8 @@ import { ProjectService, ProjectDTO } from '../../data/services/project.service'
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 2rem;
+      flex: 1;
+      margin-bottom: 2rem;
     }
 
     .project-card {
@@ -168,9 +173,10 @@ import { ProjectService, ProjectDTO } from '../../data/services/project.service'
       gap: 1rem;
       margin-top: auto;
       flex-shrink: 0;
+      justify-content: flex-end;
     }
 
-    .project-link, .github-link, .edit-button {
+    .project-link, .github-link, .edit-button, .delete-button {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -215,6 +221,28 @@ import { ProjectService, ProjectDTO } from '../../data/services/project.service'
       &:hover {
         color: #2D3748;
         background-color: #E2E8F0;
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+
+    .delete-button {
+      color: #E53E3E;
+      background: none;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      background-color: #FFF5F5;
+
+      &:hover {
+        background-color: #FED7D7;
       }
 
       i {
@@ -285,6 +313,19 @@ export class ProjectListComponent implements OnInit {
 
   viewProject(projectId: number): void {
     this.router.navigate(['/project', projectId]);
+  }
+
+  deleteProject(projectId: number): void {
+    if (confirm('Bu projeyi silmek istediğinizden emin misiniz?')) {
+      this.projectService.deleteProject(projectId).subscribe({
+        next: () => {
+          this.loadProjects();
+        },
+        error: (error) => {
+          console.error('Proje silinirken hata oluştu:', error);
+        }
+      });
+    }
   }
 
   loadProjects(): void {

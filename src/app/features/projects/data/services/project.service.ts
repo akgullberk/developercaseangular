@@ -44,6 +44,12 @@ export class ProjectService {
     );
   }
 
+  deleteProject(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Bir hata oluştu';
     

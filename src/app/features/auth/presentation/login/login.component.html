@@ -1,6 +1,11 @@
 <div class="login-container">
   <div class="login-card">
     <h2>Giriş Yap</h2>
+    
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="username">Kullanıcı Adı</label>
@@ -8,10 +13,11 @@
           type="text" 
           id="username" 
           formControlName="username" 
+          placeholder="Kullanıcı adınızı girin"
           [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
         >
         <div class="error-message" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
-          Kullanıcı adı gereklidir
+          Kullanıcı adı zorunludur
         </div>
       </div>
 
@@ -21,20 +27,16 @@
           type="password" 
           id="password" 
           formControlName="password"
+          placeholder="Şifrenizi girin"
           [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
         >
         <div class="error-message" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-          Şifre en az 6 karakter olmalıdır
+          Şifre zorunludur
         </div>
       </div>
 
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
-
       <button type="submit" [disabled]="loginForm.invalid || isLoading">
-        <span *ngIf="!isLoading">Giriş Yap</span>
-        <span *ngIf="isLoading">Giriş Yapılıyor...</span>
+        {{ isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap' }}
       </button>
     </form>
 

@@ -5,83 +5,144 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #F7FAFC;
+  padding: 2%;
+  width: 100%;
+}
   
   .login-card {
     background: white;
-    padding: 2rem;
+  padding: 5%;
     border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    
-    h2 {
+  box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 28rem;
+
+  @media (min-width: 768px) {
+    width: 80%;
+    padding: 4%;
+  }
+
+  h2 {
+    color: #2D3748;
+    margin-bottom: 8%;
       text-align: center;
-      color: #333;
-      margin-bottom: 2rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
     }
     
     .form-group {
-      margin-bottom: 1.5rem;
+  margin-bottom: 6%;
       
       label {
         display: block;
-        margin-bottom: 0.5rem;
-        color: #666;
+    margin-bottom: 2%;
+    color: #4A5568;
+    font-weight: 500;
+    font-size: clamp(0.875rem, 2vw, 1rem);
       }
       
       input {
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
+    padding: 3% 4%;
+    border: 1px solid #E2E8F0;
         border-radius: 0.5rem;
-        font-size: 1rem;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #FF6B00;
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+    }
+
+    &::placeholder {
+      color: #A0AEC0;
+    }
         
         &.error {
-          border-color: #ff6b6b;
+      border-color: #E53E3E;
+    }
         }
       }
       
       .error-message {
-        color: #ff6b6b;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-      }
+  background-color: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  color: #DC2626;
+  padding: 3%;
+  border-radius: 0.5rem;
+  margin-bottom: 5%;
+  text-align: center;
+  font-size: clamp(0.75rem, 1.8vw, 0.875rem);
     }
     
     button {
       width: 100%;
-      padding: 0.75rem;
-      background-color: #FF6B00;
+  padding: 3% 0;
+  background: #FF6B00;
       color: white;
       border: none;
       border-radius: 0.5rem;
-      font-size: 1rem;
+  font-size: clamp(0.875rem, 2vw, 1rem);
       cursor: pointer;
-      transition: background-color 0.2s;
+  transition: all 0.2s;
       
-      &:hover {
-        background-color: color.adjust(#FF6B00, $lightness: -10%);
+  &:hover:not(:disabled) {
+    background: #E65C00;
+    transform: translateY(-2px);
       }
       
       &:disabled {
-        background-color: #ccc;
+    background: #CBD5E0;
         cursor: not-allowed;
+    transform: none;
       }
     }
     
     .register-link {
       text-align: center;
-      margin-top: 1.5rem;
+  margin-top: 8%;
+  color: #4A5568;
+  font-size: clamp(0.875rem, 2vw, 1rem);
       
       a {
         color: #FF6B00;
         text-decoration: none;
+    font-weight: 500;
         
         &:hover {
           text-decoration: underline;
         }
       }
     }
+
+// Responsive tasarım için medya sorguları
+@media (max-width: 480px) {
+  .login-card {
+    width: 95%;
+    padding: 6%;
+  }
+
+  .form-group {
+    margin-bottom: 8%;
+  }
+
+  button {
+    padding: 4% 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .login-card {
+    padding: 3%;
+  }
+
+  .form-group {
+    margin-bottom: 4%;
+  }
+
+  button {
+    padding: 2% 0;
   }
 } 
