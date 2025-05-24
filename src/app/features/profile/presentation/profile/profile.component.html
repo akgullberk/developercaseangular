@@ -1,0 +1,66 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <h1>Profil Bilgilerim</h1>
+    <p>Hesap bilgilerinizi buradan yönetebilirsiniz</p>
+  </div>
+
+  <div class="profile-content">
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+      <div class="form-section">
+        <h2>Kişisel Bilgiler</h2>
+
+        <div class="form-group">
+          <label for="username">Kullanıcı Adı</label>
+          <input
+            type="text"
+            id="username"
+            [value]="userProfile?.username"
+            readonly
+            class="readonly-input"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-posta</label>
+          <input
+            type="email"
+            id="email"
+            [value]="userProfile?.email"
+            readonly
+            class="readonly-input"
+          >
+        </div>
+      </div>
+    </form>
+
+    <div class="profile-sidebar">
+      <div class="profile-card">
+        <div class="profile-avatar" [class.has-image]="hasProfileImage()">
+          <img *ngIf="hasProfileImage()" [src]="getProfileImage()" alt="Profil fotoğrafı">
+          <span *ngIf="!hasProfileImage()">{{ getInitials() }}</span>
+        </div>
+        <h3>{{ getFullName() }}</h3>
+        <p>{{ userProfile?.email }}</p>
+        <p class="username">Kullanıcı adı: {{ userProfile?.username }}</p>
+      </div>
+
+      <div class="quick-links">
+        <h3>Hızlı Erişim</h3>
+        <ul>
+          <li>
+            <a routerLink="/my-cards">
+              <i class="fas fa-id-card"></i>
+              Dijital Kartım
+            </a>
+          </li>
+          <li>
+            <a routerLink="/my-projects">
+              <i class="fas fa-code-branch"></i>
+              Projelerim
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,10 +1,10 @@
-import { Component, OnInit, NgModule } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../../auth/data/services/auth.service';
 import { finalize } from 'rxjs/operators';
-import { DigitalCardService, DigitalCardResponse, DigitalCardRequest } from '../../../digital-card/data/services/digital-card.service';
+import { DigitalCardService, DigitalCardResponse } from '../../../digital-card/data/services/digital-card.service';
 import { ImageCropperModule, ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { FileUploadService } from '../../../digital-card/data/services/file-upload.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -14,298 +14,8 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <div class="profile-container">
-      <div class="profile-header">
-        <h1>Profil Bilgilerim</h1>
-        <p>Hesap bilgilerinizi buradan yönetebilirsiniz</p>
-      </div>
-
-      <div class="profile-content">
-        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
-          <div class="form-section">
-            <h2>Kişisel Bilgiler</h2>
-
-            <div class="form-group">
-              <label for="username">Kullanıcı Adı</label>
-              <input
-                type="text"
-                id="username"
-                [value]="userProfile?.username"
-                readonly
-                class="readonly-input"
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="email">E-posta</label>
-              <input
-                type="email"
-                id="email"
-                [value]="userProfile?.email"
-                readonly
-                class="readonly-input"
-              >
-            </div>
-          </div>
-        </form>
-
-        <div class="profile-sidebar">
-          <div class="profile-card">
-            <div class="profile-avatar" [class.has-image]="hasProfileImage()">
-              <img *ngIf="hasProfileImage()" [src]="getProfileImage()" alt="Profil fotoğrafı">
-              <span *ngIf="!hasProfileImage()">{{ getInitials() }}</span>
-            </div>
-            <h3>{{ getFullName() }}</h3>
-            <p>{{ userProfile?.email }}</p>
-            <p class="username">Kullanıcı adı: {{ userProfile?.username }}</p>
-          </div>
-
-          <div class="quick-links">
-            <h3>Hızlı Erişim</h3>
-            <ul>
-              <li>
-                <a routerLink="/my-cards">
-                  <i class="fas fa-id-card"></i>
-                  Dijital Kartım
-                </a>
-              </li>
-              <li>
-                <a routerLink="/my-projects">
-                  <i class="fas fa-code-branch"></i>
-                  Projelerim
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .profile-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-      margin-top: 64px; /* Top bar yüksekliği kadar margin */
-
-      .profile-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        padding-top: 2rem; /* Ek padding */
-
-        h1 {
-          font-size: 2.5rem;
-          color: #2D3748;
-          margin-bottom: 0.5rem;
-        }
-
-        p {
-          color: #718096;
-          font-size: 1.1rem;
-        }
-      }
-
-      .profile-content {
-        display: grid;
-        grid-template-columns: 1fr 300px;
-        gap: 2rem;
-
-        @media (max-width: 1024px) {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .profile-form {
-        background: white;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-        .form-section {
-          margin-bottom: 2rem;
-          padding-bottom: 2rem;
-          border-bottom: 1px solid #E2E8F0;
-
-          &:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-          }
-
-          h2 {
-            color: #2D3748;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-          }
-        }
-
-        .form-group {
-          margin-bottom: 1.5rem;
-
-          label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #4A5568;
-            font-weight: 500;
-          }
-
-          input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #E2E8F0;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: all 0.2s;
-
-            &:focus {
-              outline: none;
-              border-color: #FF6B00;
-              box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
-            }
-
-            &[readonly] {
-              background: #F7FAFC;
-              cursor: not-allowed;
-            }
-          }
-        }
-      }
-
-      .profile-sidebar {
-        .profile-card {
-          background: white;
-          padding: 2rem;
-          border-radius: 1rem;
-          text-align: center;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          margin-bottom: 2rem;
-
-          .profile-avatar {
-            width: 100px;
-            height: 100px;
-            background: #FF6B00;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            color: white;
-            font-size: 2rem;
-            font-weight: 500;
-            overflow: hidden;
-            position: relative;
-
-            &.has-image {
-              background: none;
-              border: 2px solid #FF6B00;
-            }
-
-            img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-
-            span {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 100%;
-              height: 100%;
-            }
-          }
-
-          h3 {
-            color: #2D3748;
-            margin-bottom: 0.5rem;
-          }
-
-          p {
-            color: #718096;
-          }
-        }
-
-        .quick-links {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 1rem;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-          h3 {
-            color: #2D3748;
-            margin-bottom: 1rem;
-          }
-
-          ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-
-            li {
-              margin-bottom: 0.5rem;
-
-              &:last-child {
-                margin-bottom: 0;
-              }
-
-              a {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                padding: 0.75rem;
-                color: #4A5568;
-                text-decoration: none;
-                border-radius: 0.5rem;
-                transition: all 0.2s;
-
-                &:hover {
-                  background: #F7FAFC;
-                  color: #FF6B00;
-                }
-
-                i {
-                  width: 20px;
-                  text-align: center;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    @media (max-width: 768px) {
-      .profile-container {
-        padding: 1rem;
-        margin-top: 56px; /* Mobilde top bar daha alçak olabilir */
-
-        .profile-header {
-          margin-bottom: 2rem;
-          padding-top: 1.5rem;
-
-          h1 {
-            font-size: 2rem;
-          }
-        }
-
-        .profile-form {
-          padding: 1.5rem;
-        }
-      }
-    }
-
-    .readonly-input {
-      background-color: #F7FAFC !important;
-      cursor: not-allowed !important;
-    }
-
-    .username {
-      color: #718096;
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
-    }
-  `]
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
@@ -319,58 +29,51 @@ export class ProfileComponent implements OnInit {
     private digitalCardService: DigitalCardService
   ) {
     this.profileForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      surname: ['', [Validators.required, Validators.minLength(2)]]
+      username: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
   ngOnInit(): void {
     this.loadUserProfile();
-    this.loadDigitalCardFullName();
   }
 
   loadUserProfile(): void {
     this.isLoading = true;
     this.authService.getUserProfile()
-      .pipe(
-        finalize(() => this.isLoading = false)
-      )
+      .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (profile) => {
           this.userProfile = profile;
-          this.profileForm.patchValue({
-            name: profile.name,
-            surname: profile.surname
-          });
+          this.loadDigitalCardFullName();
         },
         error: (error) => {
-          console.error('Profil bilgileri yüklenirken hata oluştu:', error);
+          console.error('Profil yüklenirken hata oluştu:', error);
         }
       });
   }
 
   loadDigitalCardFullName(): void {
-    this.authService.getUserProfile().subscribe(profile => {
-      this.digitalCardService.getDigitalCard(profile.username).subscribe(card => {
-        this.digitalCard = card;
+    if (this.userProfile) {
+      this.digitalCardService.getDigitalCard(this.userProfile.username).subscribe({
+        next: (card) => {
+          this.digitalCard = card;
+        }
       });
-    });
+    }
   }
 
   getInitials(): string {
-    if (this.digitalCard) {
-      return this.digitalCard.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
-    }
-    if (!this.userProfile) return '';
-    return `${this.userProfile.name[0]}${this.userProfile.surname[0]}`.toUpperCase();
+    if (!this.digitalCard?.fullName) return '';
+    return this.digitalCard.fullName
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
   }
 
   getFullName(): string {
-    if (this.digitalCard) {
-      return this.digitalCard.fullName;
-    }
-    if (!this.userProfile) return '';
-    return `${this.userProfile.name} ${this.userProfile.surname}`;
+    return this.digitalCard?.fullName || 'İsimsiz Kullanıcı';
   }
 
   hasProfileImage(): boolean {
@@ -383,24 +86,7 @@ export class ProfileComponent implements OnInit {
 
   onSubmit(): void {
     if (this.profileForm.valid) {
-      this.isLoading = true;
-      const updateData = {
-        name: this.profileForm.get('name')?.value,
-        surname: this.profileForm.get('surname')?.value
-      };
-
-      this.authService.updateUserProfile(updateData)
-        .pipe(
-          finalize(() => this.isLoading = false)
-        )
-        .subscribe({
-          next: (updatedProfile) => {
-            this.userProfile = updatedProfile;
-          },
-          error: (error) => {
-            console.error('Profil güncellenirken hata oluştu:', error);
-          }
-        });
+      // Form gönderme işlemleri
     }
   }
 }

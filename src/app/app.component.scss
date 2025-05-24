@@ -55,6 +55,8 @@
       .nav-buttons {
         display: flex;
         gap: 2%;
+        align-items: center;
+        justify-content: flex-end;
 
         button {
           padding: 0.8em 1.5em;
@@ -63,6 +65,21 @@
           cursor: pointer;
           transition: all 0.3s ease;
           font-size: clamp(0.8rem, 1.5vw, 1rem);
+          white-space: nowrap;
+          min-width: 120px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5em;
+        }
+
+        .login-btn, .register-btn, .digital-card-btn, .logout-btn {
+          width: auto;
+          min-width: 120px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .login-btn {
@@ -76,7 +93,7 @@
           }
         }
 
-        .register-btn {
+        .register-btn, .digital-card-btn {
           background: #FF6B00;
           border: none;
           color: white;
@@ -88,33 +105,71 @@
           }
         }
 
-        .digital-card-btn {
-          background: #FF6B00;
-          color: white;
-          border: none;
-          padding: 0.8em 1.5em;
-          border-radius: 50px;
-          cursor: pointer;
-          transition: all 0.3s;
-          
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
-          }
-        }
-        
         .logout-btn {
           background: transparent;
           border: 2px solid #FF6B00;
           color: #FF6B00;
-          padding: 0.8em 1.5em;
-          border-radius: 50px;
-          cursor: pointer;
-          transition: all 0.3s;
-          
+
           &:hover {
             background: rgba(255, 107, 0, 0.1);
             transform: translateY(-2px);
+          }
+        }
+
+        @media (max-width: 768px) {
+          gap: 1.2%;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          
+          button, 
+          .login-btn, 
+          .register-btn, 
+          .digital-card-btn, 
+          .logout-btn {
+            font-size: 0.75rem;
+            padding: 0.5em;
+            min-width: 85px;
+            height: 32px;
+            
+            i, svg {
+              font-size: 0.9rem;
+              margin-right: 0.2em;
+            }
+          }
+        }
+
+        @media (max-width: 480px) {
+          gap: 1%;
+          
+          button,
+          .login-btn, 
+          .register-btn, 
+          .digital-card-btn, 
+          .logout-btn {
+            font-size: 0.7rem;
+            padding: 0.4em;
+            min-width: 70px;
+            height: 30px;
+
+            i, svg {
+              font-size: 0.8rem;
+              margin-right: 0.2em;
+            }
+          }
+        }
+
+        @media (max-width: 360px) {
+          gap: 0.8%;
+          
+          button,
+          .login-btn, 
+          .register-btn, 
+          .digital-card-btn, 
+          .logout-btn {
+            font-size: 0.65rem;
+            padding: 0.3em;
+            min-width: 65px;
+            height: 28px;
           }
         }
       }
@@ -318,15 +373,12 @@
 @media (max-width: 768px) {
   .app-container {
     .navbar {
-      padding: 3% 4%;
+      padding: 2.5% 3%;
 
       .nav-content {
         .nav-buttons {
-          gap: 3%;
-          
-          button {
-            padding: 0.6em 1.2em;
-          }
+          gap: 1.5%;
+          margin-left: auto;
         }
       }
     }

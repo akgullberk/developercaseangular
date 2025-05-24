@@ -37,7 +37,7 @@ export const routes: Routes = [
   },
   {
     path: 'card/:id',
-    loadComponent: () => import('./features/digital-card/card-detail/card-detail.component').then(m => m.CardDetailComponent)
+    loadComponent: () => import('./features/digital-card/presentation/card-detail/card-detail.component').then(m => m.CardDetailComponent)
   },
   {
     path: 'project/:id',

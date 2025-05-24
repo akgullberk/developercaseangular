@@ -1,0 +1,253 @@
+.profile-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2% 3%;
+  margin-top: 8vh;
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 5%;
+    padding-top: 3%;
+
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      color: #2D3748;
+      margin-bottom: 2%;
+    }
+
+    p {
+      color: #718096;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+    }
+  }
+
+  .profile-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4%;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+      gap: 3%;
+    }
+  }
+
+  .profile-form {
+    background: white;
+    padding: 4%;
+    border-radius: 1rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+
+    .form-section {
+      margin-bottom: 5%;
+      padding-bottom: 5%;
+      border-bottom: 1px solid #E2E8F0;
+
+      &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      h2 {
+        color: #2D3748;
+        font-size: clamp(1.2rem, 3vw, 1.5rem);
+        margin-bottom: 4%;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 4%;
+
+      label {
+        display: block;
+        margin-bottom: 2%;
+        color: #4A5568;
+        font-weight: 500;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+      }
+
+      input {
+        width: 100%;
+        padding: 3%;
+        border: 1px solid #E2E8F0;
+        border-radius: 0.5rem;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+        transition: all 0.2s;
+
+        &:focus {
+          outline: none;
+          border-color: #FF6B00;
+          box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+        }
+
+        &[readonly] {
+          background: #F7FAFC;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  .profile-sidebar {
+    .profile-card {
+      background: white;
+      padding: 6%;
+      border-radius: 1rem;
+      text-align: center;
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+      margin-bottom: 8%;
+
+      .profile-avatar {
+        width: 30%;
+        aspect-ratio: 1;
+        background: #FF6B00;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8%;
+        color: white;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 500;
+        overflow: hidden;
+        position: relative;
+
+        &.has-image {
+          background: none;
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      h3 {
+        color: #2D3748;
+        font-size: clamp(1.1rem, 2.5vw, 1.25rem);
+        margin-bottom: 3%;
+      }
+
+      p {
+        color: #718096;
+        font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+        margin-bottom: 2%;
+
+        &.username {
+          color: #A0AEC0;
+          font-size: clamp(0.7rem, 1.6vw, 0.8rem);
+        }
+      }
+    }
+
+    .quick-links {
+      background: white;
+      padding: 6%;
+      border-radius: 1rem;
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+
+      h3 {
+        color: #2D3748;
+        font-size: clamp(1rem, 2.2vw, 1.1rem);
+        margin-bottom: 6%;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin-bottom: 4%;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          a {
+            display: flex;
+            align-items: center;
+            gap: 4%;
+            color: #4A5568;
+            text-decoration: none;
+            padding: 4%;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+
+            i {
+              color: #FF6B00;
+              font-size: clamp(1rem, 2vw, 1.1rem);
+            }
+
+            &:hover {
+              background: #F7FAFC;
+              color: #FF6B00;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobil için ek düzenlemeler
+@media (max-width: 768px) {
+  .profile-container {
+    width: 95%;
+    padding: 4% 3%;
+    margin-top: 7vh;
+
+    .profile-header {
+      margin-bottom: 6%;
+      padding-top: 4%;
+    }
+
+    .profile-content {
+      gap: 5%;
+    }
+
+    .profile-form {
+      padding: 5%;
+    }
+
+    .profile-sidebar {
+      .profile-card {
+        padding: 7%;
+        
+        .profile-avatar {
+          width: 35%;
+          margin-bottom: 6%;
+        }
+      }
+      
+      .quick-links {
+        padding: 7%;
+      }
+    }
+  }
+}
+
+// Tablet için ek düzenlemeler
+@media (min-width: 769px) and (max-width: 1024px) {
+  .profile-container {
+    width: 92%;
+    
+    .profile-content {
+      gap: 4%;
+    }
+    
+    .profile-sidebar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4%;
+      
+      @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+} 

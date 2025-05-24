@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { DigitalCardService, CardWithProjectsDTO } from '../data/services/digital-card.service';
-import { AuthService } from '../../auth/data/services/auth.service';
-import { ContactService, ContactFormData } from '../data/services/contact.service';
+import { DigitalCardService, CardWithProjectsDTO } from '../../data/services/digital-card.service';
+import { AuthService } from '../../../auth/data/services/auth.service';
+import { ContactService, ContactFormData } from '../../data/services/contact.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
