@@ -70,7 +70,7 @@ import { CardItemComponent } from '../digital-card/presentation/card-item/card-i
         </div>
         <div class="cards-grid">
           <div *ngFor="let card of popularCards" class="card-wrapper">
-            <div class="card-container" (click)="viewCard(card.username)">
+            <div class="card-container" (click)="viewCard(card.username, $event)">
               <app-card-item [card]="transformToCardItem(card)" [maxSkills]="3"></app-card-item>
             </div>
           </div>
@@ -120,7 +120,14 @@ export class HomeComponent implements OnInit {
     };
   }
 
-  viewCard(username: string): void {
+  viewCard(username: string, event: MouseEvent): void {
+    // Eğer tıklanan element bir link ise kartın açılmasını engelle
+    const target = event.target as HTMLElement;
+    if (target.closest('a')) {
+      event.stopPropagation();
+      return;
+    }
+    
     window.location.href = `/card/${username}`;
   }
 }

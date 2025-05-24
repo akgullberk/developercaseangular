@@ -11,10 +11,18 @@
         type="text"
         id="name"
         formControlName="name"
-        placeholder="Projenizin adını girin"
+        placeholder="Projenizin adını girin (max 100 karakter)"
+        (input)="onProjectNameInput($event)"
+        maxlength="100"
       >
+      <div class="helper-text">
+        Maksimum 100 karakter girebilirsiniz. Kalan: {{ MAX_PROJECT_NAME_LENGTH - (projectForm.get('name')?.value?.length || 0) }}
+      </div>
       <div class="error-message" *ngIf="projectForm.get('name')?.errors?.['required'] && projectForm.get('name')?.touched">
         Proje adı zorunludur
+      </div>
+      <div class="error-message" *ngIf="projectForm.get('name')?.errors?.['maxlength']">
+        Proje ismi 100 karakterden fazla olamaz
       </div>
     </div>
 

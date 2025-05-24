@@ -14,6 +14,7 @@ import { ProjectService } from '../../data/services/project.service';
 export class CreateProjectComponent {
   projectForm: FormGroup;
   isLoading = false;
+  readonly MAX_PROJECT_NAME_LENGTH = 100;
 
   constructor(
     private fb: FormBuilder,
@@ -21,11 +22,21 @@ export class CreateProjectComponent {
     private router: Router
   ) {
     this.projectForm = this.fb.group({
-      name: ['', [Validators.required]],
+      name: ['', [Validators.required, Validators.maxLength(this.MAX_PROJECT_NAME_LENGTH)]],
       description: ['', [Validators.required]],
       technologies: ['', [Validators.required]],
       githubLink: ['', [Validators.pattern('^https://github.com/.*')]]
     });
+  }
+
+  onProjectNameInput(event: any): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value.length > this.MAX_PROJECT_NAME_LENGTH) {
+      input.value = input.value.slice(0, this.MAX_PROJECT_NAME_LENGTH);
+      this.projectForm.patchValue({
+        name: input.value
+      });
+    }
   }
 
   onTechnologyInput(event: any): void {
@@ -54,6 +65,13 @@ export class CreateProjectComponent {
     if (this.projectForm.valid) {
       this.isLoading = true;
       const formData = this.projectForm.value;
+
+      // Proje adı uzunluk kontrolü
+      if (formData.name.length > this.MAX_PROJECT_NAME_LENGTH) {
+        alert(`Proje ismi ${this.MAX_PROJECT_NAME_LENGTH} karakterden fazla olamaz.`);
+        this.isLoading = false;
+        return;
+      }
       
       const technologies = formData.technologies
         .split(',')

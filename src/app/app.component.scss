@@ -98,18 +98,18 @@
           border: none;
           color: white;
           box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
-
+          
           &:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
           }
         }
-
+        
         .logout-btn {
           background: transparent;
           border: 2px solid #FF6B00;
           color: #FF6B00;
-
+          
           &:hover {
             background: rgba(255, 107, 0, 0.1);
             transform: translateY(-2px);

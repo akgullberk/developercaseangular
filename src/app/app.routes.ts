@@ -36,11 +36,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/digital-card/presentation/all-cards/all-cards.component').then(m => m.AllCardsComponent)
   },
   {
-    path: 'card/:id',
+    path: 'card/:username',
     loadComponent: () => import('./features/digital-card/presentation/card-detail/card-detail.component').then(m => m.CardDetailComponent)
   },
   {
-    path: 'project/:id',
+    path: 'projects/:id',
+    canActivate: [AuthGuard],
     loadComponent: () => import('./features/projects/presentation/project-detail/project-detail.component').then(m => m.ProjectDetailComponent)
   },
   {

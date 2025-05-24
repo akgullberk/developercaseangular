@@ -2,34 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { DigitalCardService, DigitalCardResponse } from '../../data/services/digital-card.service';
-import { CardItemComponent } from '../card-item/card-item.component';
 import { DigitalCard } from '../../domain/models/digital-card.model';
+import { CardItemComponent } from '../card-item/card-item.component';
 
 @Component({
   selector: 'app-all-cards',
   standalone: true,
-  imports: [CommonModule, CardItemComponent, RouterModule],
-  template: `
-    <div class="all-cards-container">
-      <div class="header">
-        <h1>Tüm Dijital Kartlar</h1>
-        <p>Sistemdeki tüm dijital kartları görüntüleyin</p>
-      </div>
-
-      <div class="cards-grid">
-        <div *ngFor="let card of cards" class="card-wrapper">
-          <div class="card-container" (click)="viewCard(card.username)">
-            <app-card-item [card]="transformToCardItem(card)" [maxSkills]="3"></app-card-item>
-          </div>
-          <div class="card-actions" *ngIf="card.phone">
-            <a [href]="'https://wa.me/' + card.phone" target="_blank" class="whatsapp-btn">
-              <i class="fab fa-whatsapp"></i> WhatsApp
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [CommonModule, RouterModule, CardItemComponent],
+  templateUrl: './all-cards.component.html',
   styleUrls: ['./all-cards.component.scss']
 })
 export class AllCardsComponent implements OnInit {

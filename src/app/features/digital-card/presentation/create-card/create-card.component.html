@@ -1,0 +1,184 @@
+<div class="create-card-container">
+  <div class="create-card-content">
+    <h2>Yeni Dijital Kart Oluştur</h2>
+    
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="cardForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="title">Başlık</label>
+        <input 
+          type="text" 
+          id="title" 
+          formControlName="title"
+          placeholder="Örn: Senior Frontend Developer"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="fullName">Ad Soyad</label>
+        <input 
+          type="text" 
+          id="fullName" 
+          formControlName="fullName"
+          placeholder="Örn: Ahmet Yılmaz"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="biography">Biyografi</label>
+        <textarea 
+          id="biography" 
+          formControlName="biography"
+          rows="4"
+          placeholder="Kendinizi kısaca tanıtın..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="profileImage">Profil Fotoğrafı</label>
+        <div class="file-upload-container">
+          <input
+            type="file"
+            id="profileImage"
+            #fileInput
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            style="display: none"
+          >
+          <button type="button" class="file-upload-btn" (click)="fileInput.click()">
+            <i class="fas fa-upload"></i> Profil Fotoğrafı Seç
+          </button>
+          <span class="file-name">{{ selectedFileName || 'Dosya seçilmedi' }}</span>
+        </div>
+        <div *ngIf="previewImageUrl" class="image-preview">
+          <img [src]="previewImageUrl" alt="Profil fotoğrafı önizleme">
+        </div>
+      </div>
+
+      <div class="social-links">
+        <h3>Sosyal Medya Bağlantıları</h3>
+        
+        <div class="form-group">
+          <label for="github">GitHub</label>
+          <input 
+            type="text" 
+            id="github" 
+            formControlName="github"
+            placeholder="GitHub profiliniz"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="linkedin">LinkedIn</label>
+          <input 
+            type="text" 
+            id="linkedin" 
+            formControlName="linkedin"
+            placeholder="LinkedIn profiliniz"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="twitter">Twitter</label>
+          <input 
+            type="text" 
+            id="twitter" 
+            formControlName="twitter"
+            placeholder="Twitter profiliniz"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="instagram">Instagram</label>
+          <input 
+            type="text" 
+            id="instagram" 
+            formControlName="instagram"
+            placeholder="Instagram profiliniz"
+          >
+        </div>
+
+        <div formArrayName="additionalLinks">
+          <div *ngFor="let link of additionalLinks.controls; let i = index" [formGroupName]="i" class="additional-link">
+            <div class="form-group">
+              <div class="link-header">
+                <label [for]="'linkTitle' + i">Bağlantı Başlığı</label>
+                <button type="button" class="remove-btn" (click)="removeLink(i)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <input 
+                type="text" 
+                [id]="'linkTitle' + i" 
+                formControlName="title"
+                placeholder="Örn: Kişisel Blog"
+              >
+            </div>
+            <div class="form-group">
+              <label [for]="'linkUrl' + i">Bağlantı URL</label>
+              <input 
+                type="url" 
+                [id]="'linkUrl' + i" 
+                formControlName="url"
+                placeholder="https://..."
+              >
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="add-link-btn" (click)="addLink()">
+          <i class="fas fa-plus"></i> Yeni Bağlantı Ekle
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label for="skills">Yetenekler (virgülle ayırın)</label>
+        <input 
+          type="text" 
+          id="skills" 
+          formControlName="skills"
+          placeholder="Örn: Angular, TypeScript, React"
+        >
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="cancel-btn" routerLink="/">İptal</button>
+        <button type="submit" class="submit-btn" [disabled]="!cardForm.valid || isLoading">
+          {{ isLoading ? 'Oluşturuluyor...' : 'Kartı Oluştur' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Resim Kırpma Modalı -->
+<div class="modal" *ngIf="showCropper">
+  <div class="modal-content">
+    <h2>Profil Fotoğrafını Düzenle</h2>
+    <image-cropper
+      [imageFile]="imageChangedEvent?.target?.files[0]"
+      [maintainAspectRatio]="true"
+      [aspectRatio]="1"
+      [roundCropper]="true"
+      [onlyScaleDown]="true"
+      [alignImage]="'center'"
+      format="png"
+      outputType="base64"
+      [resizeToWidth]="300"
+      [resizeToHeight]="300"
+      [cropperMinWidth]="100"
+      [cropperMinHeight]="100"
+      (imageCropped)="imageCropped($event)"
+      (imageLoaded)="imageLoaded($event)"
+      (loadImageFailed)="loadImageFailed()"
+      [containWithinAspectRatio]="true"
+    ></image-cropper>
+    <div class="modal-buttons">
+      <button type="button" class="cancel-btn" (click)="cancelCropping()">İptal</button>
+      <button type="button" class="save-btn" (click)="saveCroppedImage()">Kaydet</button>
+    </div>
+  </div>
+</div> 

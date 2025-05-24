@@ -1,0 +1,33 @@
+<div class="my-cards-container">
+  <div class="content-wrapper">
+    <div class="content-center">
+      <ng-container *ngIf="card">
+        <app-card-item [card]="getCardItemData(card)" [maxSkills]="3"></app-card-item>
+        <div class="edit-btn-container">
+          <button class="edit-btn" (click)="goToEditCard()">
+            <i class="fas fa-edit"></i> Düzenle
+          </button>
+        </div>
+      </ng-container>
+
+      <div *ngIf="!card && !isLoading" class="empty-state">
+        <i class="fas fa-id-card"></i>
+        <h3>Henüz dijital kartınız yok</h3>
+        <p>İlk dijital kartınızı oluşturmak için "Yeni Kart Oluştur" butonuna tıklayın.</p>
+        <a routerLink="/create-card" class="create-btn">
+          <i class="fas fa-plus"></i>
+          Yeni Kart Oluştur
+        </a>
+      </div>
+
+      <div *ngIf="isLoading" class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Kartınız yükleniyor...</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+</div> 

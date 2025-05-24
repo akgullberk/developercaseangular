@@ -1,14 +1,25 @@
 .card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  width: 100%;
+  max-width: 90%;
   margin: 0 auto;
+  padding: clamp(1rem, 2vw, 2rem);
+}
+
+@media (max-width: 1200px) {
+  .card-list {
+    max-width: 95%;
+    gap: clamp(0.8rem, 2.5vw, 1.5rem);
+  }
 }
 
 @media (max-width: 768px) {
   .card-list {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    max-width: 100%;
+    gap: clamp(0.5rem, 2vw, 1rem);
+    padding: clamp(0.5rem, 1.5vw, 1rem);
   }
 }

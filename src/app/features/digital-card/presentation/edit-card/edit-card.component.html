@@ -1,0 +1,111 @@
+<div class="edit-card-container">
+  <h2>Dijital Kartı Düzenle</h2>
+  <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form-grid">
+    <div class="form-group">
+      <label for="fullName">Ad Soyad</label>
+      <input id="fullName" formControlName="fullName" type="text" />
+    </div>
+    <div class="form-group">
+      <label for="title">Başlık</label>
+      <input id="title" formControlName="title" type="text" />
+    </div>
+    <div class="form-group">
+      <label for="biography">Biyografi</label>
+      <textarea id="biography" formControlName="biography"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="profileImage">Profil Fotoğrafı</label>
+      <div class="file-upload-container">
+        <input
+          type="file"
+          id="profileImage"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          style="display: none"
+        >
+        <button type="button" class="file-upload-btn" (click)="fileInput.click()">
+          <i class="fas fa-upload"></i> Profil Fotoğrafı Seç
+        </button>
+        <span class="file-name">{{ selectedFileName || 'Dosya seçilmedi' }}</span>
+      </div>
+    </div>
+    <div class="social-links">
+      <h3>Sosyal Medya Bağlantıları</h3>
+      <div class="form-group">
+        <label for="github">GitHub</label>
+        <input id="github" formControlName="github" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="linkedin">LinkedIn</label>
+        <input id="linkedin" formControlName="linkedin" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="twitter">Twitter</label>
+        <input id="twitter" formControlName="twitter" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="instagram">Instagram</label>
+        <input id="instagram" formControlName="instagram" type="text" />
+      </div>
+      <div formArrayName="additionalLinks">
+        <div *ngFor="let link of additionalLinks.controls; let i = index" [formGroupName]="i" class="additional-link">
+          <div class="form-group">
+            <label [for]="'linkTitle' + i">Bağlantı Başlığı</label>
+            <input [id]="'linkTitle' + i" formControlName="title" type="text" />
+          </div>
+          <div class="form-group">
+            <label [for]="'linkUrl' + i">Bağlantı URL</label>
+            <input [id]="'linkUrl' + i" formControlName="url" type="text" />
+          </div>
+          <button type="button" (click)="removeLink(i)">Kaldır</button>
+        </div>
+      </div>
+      <button type="button" (click)="addLink()">+ Yeni Bağlantı Ekle</button>
+    </div>
+    <div class="form-group">
+      <label for="skills">Yetenekler</label>
+      <input type="text" id="skills" formControlName="skills" placeholder="Yetenekleri virgülle ayırarak girin" (input)="onSkillsInput($event)" (keydown)="onSkillsKeydown($event)">
+    </div>
+    <div class="card-preview-section">
+      <h3>Kart Önizleme</h3>
+      <div class="preview-container">
+        <app-card-item [card]="previewCardData" [maxSkills]="3"></app-card-item>
+      </div>
+    </div>
+    <div style="grid-column: 1 / -1;">
+      <button type="submit" [disabled]="!editForm.valid || isLoading" style="width: 100%;">
+        {{ isLoading ? 'Kaydediliyor...' : 'Kaydet' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Resim Kırpma Modalı -->
+<div class="modal" *ngIf="showCropper">
+  <div class="modal-content">
+    <h2>Profil Fotoğrafını Düzenle</h2>
+    <image-cropper
+      [imageFile]="imageChangedEvent?.target?.files[0]"
+      [maintainAspectRatio]="true"
+      [aspectRatio]="1"
+      [roundCropper]="true"
+      [onlyScaleDown]="true"
+      [alignImage]="'center'"
+      format="png"
+      outputType="base64"
+      [resizeToWidth]="300"
+      [resizeToHeight]="300"
+      [cropperMinWidth]="100"
+      [cropperMinHeight]="100"
+      (imageCropped)="imageCropped($event)"
+      (imageLoaded)="imageLoaded($event)"
+      (loadImageFailed)="loadImageFailed()"
+      [containWithinAspectRatio]="true"
+    ></image-cropper>
+    <div class="modal-buttons">
+      <button type="button" class="cancel-btn" (click)="cancelCropping()">İptal</button>
+      <button type="button" class="save-btn" (click)="saveCroppedImage()">Kaydet</button>
+    </div>
+  </div>
+</div> 

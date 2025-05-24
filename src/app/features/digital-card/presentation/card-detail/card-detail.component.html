@@ -1,0 +1,161 @@
+<div class="card-detail-container" *ngIf="cardData">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="profile-photo">
+        <img [src]="cardData.digitalCard.profilePhotoUrl || 'assets/default-profile.png'" [alt]="cardData.digitalCard.fullName">
+      </div>
+      <h1>{{ cardData.digitalCard.fullName }}</h1>
+      <p class="title">{{ cardData.digitalCard.title }}</p>
+      <button class="contact-btn" (click)="showContactForm = true">
+        <i class="fas fa-envelope"></i>
+        Bana Ulaş
+      </button>
+    </div>
+  </div>
+
+  <div class="content-container">
+    <!-- Biyografi -->
+    <section class="detail-card">
+      <h2>Hakkında</h2>
+      <p class="biography">{{ cardData.digitalCard.biography }}</p>
+    </section>
+
+    <!-- Yetenekler -->
+    <section class="detail-card">
+      <h2>Yetenekler</h2>
+      <div class="skills-container">
+        <span class="skill-tag" *ngFor="let skill of cardData.digitalCard.skills">
+          {{ skill }}
+        </span>
+      </div>
+    </section>
+
+    <!-- Sosyal Medya -->
+    <section class="detail-card">
+      <h2>Sosyal Medya</h2>
+      <div class="social-links">
+        <a *ngFor="let link of cardData.digitalCard.socialMediaLinks"
+           [href]="link.url"
+           target="_blank"
+           class="social-link">
+          <i class="fab" [ngClass]="getSocialIcon(link.platform)"></i>
+          {{ link.customName || link.platform }}
+        </a>
+      </div>
+    </section>
+
+    <!-- Projeler -->
+    <section class="detail-card">
+      <h2>Projeler</h2>
+      <div class="projects-grid">
+        <div *ngFor="let project of cardData.projects" class="project-card">
+          <div class="project-header">
+            <i class="fas fa-code project-icon"></i>
+            <h4>{{ project.name }}</h4>
+          </div>
+          <p class="project-description">{{ project.description }}</p>
+          <div class="project-tags">
+            <span *ngFor="let tech of getDisplayedTechnologies(project.technologies)">{{ tech }}</span>
+            <span *ngIf="hasMoreTechnologies(project.technologies)" class="more-tag">
+              +{{ getRemainingTechnologiesCount(project.technologies) }}
+            </span>
+          </div>
+          <div class="project-actions">
+            <a *ngIf="project.githubLink" [href]="project.githubLink" target="_blank" class="github-link">
+              <i class="fab fa-github"></i>
+              GitHub
+            </a>
+            <button class="project-link" (click)="viewProject(project.id)">
+              <i class="fas fa-external-link-alt"></i>
+              Projeyi İncele
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Contact Form Modal -->
+  <div class="modal-overlay" *ngIf="showContactForm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>İletişim Formu</h3>
+        <button class="close-btn" (click)="showContactForm = false">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+        <div class="form-group">
+          <label for="name">İsim</label>
+          <input type="text" id="name" formControlName="name" placeholder="Adınız">
+          <div class="error-message" *ngIf="contactForm.get('name')?.errors?.['required'] && contactForm.get('name')?.touched">
+            İsim alanı zorunludur
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-posta</label>
+          <input type="email" id="email" formControlName="email" placeholder="E-posta adresiniz">
+          <div class="error-message" *ngIf="contactForm.get('email')?.errors?.['required'] && contactForm.get('email')?.touched">
+            E-posta alanı zorunludur
+          </div>
+          <div class="error-message" *ngIf="contactForm.get('email')?.errors?.['email'] && contactForm.get('email')?.touched">
+            Geçerli bir e-posta adresi giriniz
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Konu</label>
+          <input type="text" id="subject" formControlName="subject" placeholder="Mesajınızın konusu">
+          <div class="error-message" *ngIf="contactForm.get('subject')?.errors?.['required'] && contactForm.get('subject')?.touched">
+            Konu alanı zorunludur
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Mesaj</label>
+          <textarea id="message" formControlName="message" rows="5" placeholder="Mesajınız"></textarea>
+          <div class="error-message" *ngIf="contactForm.get('message')?.errors?.['required'] && contactForm.get('message')?.touched">
+            Mesaj alanı zorunludur
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="showContactForm = false">İptal</button>
+          <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || isSubmitting">
+            <span *ngIf="!isSubmitting">Gönder</span>
+            <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Message Modal -->
+  <div class="modal-overlay" *ngIf="showSuccessMessage">
+    <div class="modal-content success-message">
+      <i class="fas fa-check-circle"></i>
+      <h3>Mesajınız Gönderildi!</h3>
+      <p>İletişime geçtiğiniz için teşekkür ederiz.</p>
+      <button class="ok-btn" (click)="showSuccessMessage = false">Tamam</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="!cardData">
+  <div class="loading-spinner"></div>
+  <p>Kart detayları yükleniyor...</p>
+</div>
+
+<!-- Giriş Yapma Uyarısı Modal -->
+<div class="login-alert" *ngIf="showLoginAlert">
+  <div class="login-alert-content">
+    <h3>Giriş Yapmanız Gerekiyor</h3>
+    <p>Projeyi incelemek için lütfen giriş yapın.</p>
+    <div class="login-alert-actions">
+      <button class="cancel-btn" (click)="showLoginAlert = false">İptal</button>
+      <button class="login-btn" (click)="goToLogin()">Giriş Yap</button>
+    </div>
+  </div>
+</div> 

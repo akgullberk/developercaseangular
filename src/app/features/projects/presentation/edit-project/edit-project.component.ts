@@ -33,8 +33,8 @@ export class EditProjectComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.projectId = +params['id'];
-      this.loadProject();
+        this.projectId = +params['id'];
+        this.loadProject();
     });
   }
 
@@ -60,7 +60,7 @@ export class EditProjectComponent implements OnInit {
     if (this.projectForm.valid) {
       this.isSaving = true;
       const formValue = this.projectForm.value;
-      
+
       const projectData = {
         name: formValue.name,
         description: formValue.description,

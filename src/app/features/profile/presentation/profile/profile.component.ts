@@ -57,7 +57,7 @@ export class ProfileComponent implements OnInit {
     if (this.userProfile) {
       this.digitalCardService.getDigitalCard(this.userProfile.username).subscribe({
         next: (card) => {
-          this.digitalCard = card;
+        this.digitalCard = card;
         }
       });
     }

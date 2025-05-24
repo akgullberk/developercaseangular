@@ -23,7 +23,7 @@ export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
           </ng-template>
         </div>
         <div class="social-icons">
-          <a *ngFor="let key of getSocialKeys()" [href]="card.socialLinks[key]" target="_blank" [title]="key">
+          <a *ngFor="let key of getSocialKeys()" [href]="card.socialLinks[key]" target="_blank" [title]="key" (click)="$event.stopPropagation()">
             <i [ngClass]="getSocialIconClass(key)"></i>
           </a>
         </div>
@@ -44,22 +44,28 @@ export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
       color: #fff;
       border-radius: 1.5rem;
       box-shadow: 0 4px 24px rgba(255, 107, 0, 0.15);
-      height: 310px;
-      padding: 1rem 2rem 1rem 2rem;
+      height: auto;
+      min-height: 310px;
+      max-height: 400px;
+      padding: 1.5rem;
       max-width: 600px;
       margin: 0 auto;
       position: relative;
-      overflow: visible;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
     .card-header-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 1.2rem;
+      width: 100%;
     }
     .avatar {
       width: 56px;
       height: 56px;
+      min-width: 56px;
       border-radius: 50%;
       background: rgba(255,255,255,0.18);
       display: flex;
@@ -86,17 +92,26 @@ export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
       display: flex;
       gap: 1.2rem;
       margin-top: 0.2rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 70%;
     }
     .social-icons a {
       color: #fff;
       font-size: 1.4rem;
       transition: color 0.2s;
+      min-width: 20px;
+      text-align: center;
     }
     .social-icons a:hover {
       color: #222;
     }
     .card-main-content {
       text-align: left;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
     .fullname {
       font-size: 1.7rem;
@@ -105,39 +120,83 @@ export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
       letter-spacing: 1px;
       text-transform: uppercase;
       color: #fff;
+      word-break: break-word;
     }
     .title {
       font-size: 1.1rem;
       font-weight: 500;
       margin-bottom: 0.5rem;
       color: #fff;
+      word-break: break-word;
     }
     .biography {
       font-size: 1rem;
       margin-bottom: 1rem;
       color: #fff;
       opacity: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex-shrink: 0;
     }
     .skills {
       display: flex;
       flex-wrap: wrap;
       gap: 0.4rem;
+      margin-top: auto;
+      padding-top: 0.5rem;
     }
     .skill-tag {
-      background: linear-gradient(90deg, #ff9800 0%, #ff6b00 100%);
+      background: rgba(255, 255, 255, 0.2);
       color: #fff;
-      padding: 0.3rem 1.2rem;
-      border-radius: 2rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.2rem;
-      border: none;
-      box-shadow: none;
-      display: inline-block;
-      white-space: nowrap;
+      padding: 0.3rem 0.8rem;
+      border-radius: 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      max-width: calc(100% - 0.8rem);
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    @media screen and (max-width: 480px) {
+      .custom-card {
+        padding: 1rem;
+        min-height: 280px;
+      }
+      .avatar {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+      }
+      .social-icons {
+        gap: 0.8rem;
+        max-width: 60%;
+      }
+      .social-icons a {
+        font-size: 1.2rem;
+      }
+      .fullname {
+        font-size: 1.4rem;
+      }
+      .title {
+        font-size: 1rem;
+      }
+      .biography {
+        font-size: 0.9rem;
+        -webkit-line-clamp: 2;
+      }
+      .skill-tag {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.8rem;
+        max-width: calc(100% - 0.6rem);
+      }
     }
   `]
 })

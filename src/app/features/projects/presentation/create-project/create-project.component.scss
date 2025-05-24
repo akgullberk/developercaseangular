@@ -130,9 +130,10 @@
 }
 
 .helper-text {
-  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  font-size: 0.85rem;
   color: #718096;
-  margin-top: 1%;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 @media (max-width: 768px) {
