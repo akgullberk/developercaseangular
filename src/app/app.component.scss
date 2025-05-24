@@ -177,8 +177,11 @@
   }
 
   .main-content {
-    flex: 1 0 auto;
+    flex: 1;
     padding-top: 8vh;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 8vh);
 
     .hero-section {
       position: relative;
@@ -329,14 +332,12 @@
   }
 
   .app-footer {
-    flex-shrink: 0;
+    margin-top: auto;
     background: #2D3748;
     color: rgba(255, 255, 255, 0.8);
-    padding: 3% 3%;
+    padding: 3% 3% 2%;
     width: 100%;
     position: relative;
-    bottom: 0;
-    left: 0;
     z-index: 10;
 
     .footer-content {
@@ -345,6 +346,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        text-align: center;
+        gap: 4%;
+
+        .footer-links {
+          width: 100%;
+          justify-content: center;
+          margin-top: 4%;
+        }
+      }
 
       p {
         margin: 0;
@@ -360,6 +374,7 @@
           text-decoration: none;
           transition: color 0.3s ease;
           font-size: clamp(0.8rem, 1.5vw, 1rem);
+          white-space: nowrap;
 
           &:hover {
             color: white;
@@ -394,7 +409,8 @@
     }
 
     .app-footer {
-      padding: 5% 4%;
+      padding: 5% 4% 3%;
+      margin-top: auto;
 
       .footer-content {
         flex-direction: column;
@@ -426,6 +442,10 @@
       .cards-section {
         padding: 7% 3%;
       }
+    }
+
+    .app-footer {
+      padding: 3% 3% 2%;
     }
   }
 }

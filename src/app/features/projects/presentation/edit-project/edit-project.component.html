@@ -1,0 +1,75 @@
+<div class="edit-project-container">
+  <div class="form-header">
+    <h1>Proje Düzenle</h1>
+    <p>Proje detaylarını güncelleyebilirsiniz</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Proje yükleniyor...
+  </div>
+
+  <form *ngIf="!isLoading" [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+    <div class="form-group">
+      <label for="name">Proje Adı</label>
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        placeholder="Projenizin adını girin"
+      >
+      <div class="error-message" *ngIf="projectForm.get('name')?.errors?.['required'] && projectForm.get('name')?.touched">
+        Proje adı zorunludur
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Proje Açıklaması</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        rows="4"
+        placeholder="Projenizi kısaca açıklayın"
+      ></textarea>
+      <div class="error-message" *ngIf="projectForm.get('description')?.errors?.['required'] && projectForm.get('description')?.touched">
+        Proje açıklaması zorunludur
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="technologies">Teknolojiler</label>
+      <input
+        type="text"
+        id="technologies"
+        formControlName="technologies"
+        placeholder="Teknolojileri virgülle ayırarak girin (max 11 karakter)"
+        (input)="onTechnologyInput($event)"
+      >
+      <div class="helper-text">
+        Her bir teknoloji ismi maksimum 11 karakter olmalıdır.
+      </div>
+      <div class="error-message" *ngIf="projectForm.get('technologies')?.errors?.['required'] && projectForm.get('technologies')?.touched">
+        En az bir teknoloji girmelisiniz
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="githubLink">GitHub Linki</label>
+      <input
+        type="url"
+        id="githubLink"
+        formControlName="githubLink"
+        placeholder="https://github.com/kullanici/proje"
+      >
+      <div class="error-message" *ngIf="projectForm.get('githubLink')?.errors?.['pattern']">
+        Geçerli bir GitHub linki giriniz
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="cancel-button" (click)="goBack()">İptal</button>
+      <button type="submit" class="submit-button" [disabled]="projectForm.invalid || isSaving">
+        {{ isSaving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet' }}
+      </button>
+    </div>
+  </form>
+</div> 

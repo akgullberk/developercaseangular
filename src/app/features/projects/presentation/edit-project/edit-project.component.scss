@@ -1,0 +1,169 @@
+.edit-project-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3% 2%;
+  margin-top: 5vh;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 4%;
+
+  h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: #2D3748;
+    margin-bottom: 2%;
+  }
+
+  p {
+    color: #718096;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 4%;
+  color: #718096;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+}
+
+.project-form {
+  background: white;
+  padding: 5%;
+  border-radius: 1rem;
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 4%;
+
+  label {
+    display: block;
+    margin-bottom: 2%;
+    color: #4A5568;
+    font-weight: 500;
+    font-size: clamp(0.9rem, 1.8vw, 1rem);
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 3%;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    font-size: clamp(0.9rem, 1.8vw, 1rem);
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #FF6B00;
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 8vh;
+  }
+}
+
+.error-message {
+  color: #E53E3E;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  margin-top: 2%;
+}
+
+.helper-text {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  color: #718096;
+  margin-top: 2%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 3%;
+  margin-top: 5%;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 2%;
+  }
+
+  button {
+    padding: 3% 6%;
+    border-radius: 0.5rem;
+    font-size: clamp(0.9rem, 1.8vw, 1rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 120px;
+
+    @media (max-width: 768px) {
+      padding: 2.5% 5%;
+      min-width: 100px;
+    }
+
+    @media (max-width: 480px) {
+      width: 100%;
+      padding: 3% 0;
+      margin-top: 2%;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.cancel-button {
+  background: #EDF2F7;
+  color: #4A5568;
+  border: none;
+
+  &:hover {
+    background: #E2E8F0;
+  }
+}
+
+.submit-button {
+  background: #FF6B00;
+  color: white;
+  border: none;
+
+  &:hover:not(:disabled) {
+    background: #E65C00;
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-project-container {
+    width: 95%;
+    padding: 4% 3%;
+  }
+
+  .project-form {
+    padding: 6%;
+  }
+
+  .form-group {
+    margin-bottom: 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-project-container {
+    width: 98%;
+    padding: 5% 3%;
+  }
+
+  .project-form {
+    padding: 7%;
+  }
+
+  .form-group {
+    margin-bottom: 6%;
+  }
+} 

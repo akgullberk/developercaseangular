@@ -1,0 +1,50 @@
+<div class="project-detail-container" *ngIf="project">
+  <!-- Hero Section -->
+  <div class="project-hero">
+    <div class="hero-content">
+      <div class="back-button" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i>
+        Projelere Dön
+      </div>
+      <h1>{{ project.name }}</h1>
+    </div>
+  </div>
+
+  <div class="content-container">
+    <!-- Proje Açıklaması -->
+    <div class="description-card">
+      <h2>Proje Açıklaması</h2>
+      <p class="project-description">{{ project.description }}</p>
+    </div>
+
+    <!-- Proje İçeriği -->
+    <div class="project-content">
+      <!-- Teknolojiler -->
+      <section class="section-card">
+        <h2>Kullanılan Teknolojiler</h2>
+        <div class="tech-stack">
+          <div class="tech-item" *ngFor="let tech of project.technologies">
+            <i class="fas fa-code"></i>
+            <span>{{ tech }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- GitHub Bağlantısı -->
+      <section class="section-card" *ngIf="project.githubLink">
+        <h2>Proje Kaynakları</h2>
+        <div class="resources">
+          <a [href]="project.githubLink" target="_blank" class="resource-link">
+            <i class="fab fa-github"></i>
+            <span>GitHub Repository</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner"></div>
+  <p>Proje detayları yükleniyor...</p>
+</div> 

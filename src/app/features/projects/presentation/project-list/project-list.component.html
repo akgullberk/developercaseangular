@@ -1,0 +1,44 @@
+<div class="projects-container">
+  <div class="projects-header">
+    <h1>Projelerim</h1>
+    <p>Tüm projelerimi buradan inceleyebilirsiniz</p>
+  </div>
+
+  <div class="projects-grid">
+    <!-- Proje Ekle Kartı -->
+    <div class="project-card add-project" routerLink="/create-project">
+      <div class="add-project-content">
+        <i class="fas fa-plus"></i>
+        <h4>Yeni Proje Ekle</h4>
+      </div>
+    </div>
+
+    <div *ngFor="let project of projects" class="project-card" (click)="viewProject(project.id)">
+      <div class="project-header">
+        <i class="fas fa-code project-icon"></i>
+        <h4>{{ project.name }}</h4>
+      </div>
+      <p class="project-description">{{ project.description }}</p>
+      <div class="project-tags">
+        <span *ngFor="let tech of getDisplayedTechnologies(project.technologies)">{{ tech }}</span>
+        <span *ngIf="hasMoreTechnologies(project.technologies)" class="more-tag">
+          +{{ getRemainingTechnologiesCount(project.technologies) }}
+        </span>
+      </div>
+      <div class="project-actions" (click)="$event.stopPropagation()">
+        <a *ngIf="project.githubLink" [href]="project.githubLink" target="_blank" class="github-link">
+          <i class="fab fa-github"></i>
+          GitHub
+        </a>
+        <a class="edit-button" (click)="editProject(project.id)">
+          <i class="fas fa-edit"></i>
+          Düzenle
+        </a>
+        <button class="delete-button" (click)="deleteProject(project.id)">
+          <i class="fas fa-trash"></i>
+          Sil
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 
