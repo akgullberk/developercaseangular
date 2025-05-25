@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { StorageService } from '../../../../core/services/storage.service';
 import { environment } from '../../../../../environments/environment.prod';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
-const API_URL = 'http://16.170.205.160:8081/api';
+const API_URL = `${environment.apiUrl}/digital-cards`;
 
 export interface SocialMediaLink {
   platform: string;
@@ -64,7 +64,7 @@ export interface CardWithProjectsDTO {
   providedIn: 'root'
 })
 export class DigitalCardService {
-  private readonly DIGITAL_CARDS_URL = `${API_URL}/digital-cards`;
+  private readonly DIGITAL_CARDS_URL = `${API_URL}/my-cards`;
 
   constructor(
     private readonly http: HttpClient,
@@ -88,7 +88,7 @@ export class DigitalCardService {
 
   getCards(): Observable<DigitalCardResponse[]> {
     return this.http.get<DigitalCardResponse[]>(
-      `${this.DIGITAL_CARDS_URL}/my-cards`,
+      `${this.DIGITAL_CARDS_URL}`,
       { headers: this.getHeaders() }
     ).pipe(
       map(cards => cards.map(card => this.fixProfilePhotoUrl(card)))
@@ -107,7 +107,7 @@ export class DigitalCardService {
 
   getDigitalCard(username: string): Observable<DigitalCardResponse> {
     return this.http.get<DigitalCardResponse>(
-      `${this.DIGITAL_CARDS_URL}/${username}`
+      `${API_URL}/${username}`
     ).pipe(
       map(card => this.fixProfilePhotoUrl(card))
     );
@@ -131,13 +131,13 @@ export class DigitalCardService {
   }
 
   getAllDigitalCards(): Observable<DigitalCardResponse[]> {
-    return this.http.get<DigitalCardResponse[]>(`${this.DIGITAL_CARDS_URL}/all`).pipe(
+    return this.http.get<DigitalCardResponse[]>(`${API_URL}/all`).pipe(
       map(cards => cards.map(card => this.fixProfilePhotoUrl(card)))
     );
   }
 
   getCardWithProjects(username: string): Observable<CardWithProjectsDTO> {
-    return this.http.get<CardWithProjectsDTO>(`${this.DIGITAL_CARDS_URL}/${username}/with-projects`).pipe(
+    return this.http.get<CardWithProjectsDTO>(`${API_URL}/${username}/with-projects`).pipe(
       map(response => {
         if (response.digitalCard) {
           response.digitalCard = this.fixProfilePhotoUrl(response.digitalCard);
