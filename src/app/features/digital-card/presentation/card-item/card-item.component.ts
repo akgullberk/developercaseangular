@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DigitalCard as BaseDigitalCard } from '../../domain/models/digital-card.model';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment.prod';
 
 export interface DigitalCard extends Omit<BaseDigitalCard, 'socialLinks'> {
   socialLinks: { [key: string]: string };

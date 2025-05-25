@@ -6,7 +6,6 @@ import { throwError } from 'rxjs';
 import { LoginRequest } from '../../domain/models/login-request.model';
 import { RegisterRequest } from '../../domain/models/register-request.model';
 import { StorageService } from '../../../../core/services/storage.service';
-import { environment } from '../../../../../environments/environment';
 
 const API_URL = 'http://16.170.205.160:8081/api';
 
@@ -44,7 +43,7 @@ export class AuthService {
 
   register(registerRequest: RegisterRequest): Observable<any> {
     console.log('Kayıt isteği gönderiliyor:', registerRequest);
-    
+
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
@@ -93,4 +92,4 @@ export class AuthService {
 
     return this.http.patch<UserProfile>(`${API_URL}/users/profile`, profileData, { headers });
   }
-} 
+}

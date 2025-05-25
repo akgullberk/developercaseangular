@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment.prod';
 import { StorageService } from '../../../../core/services/storage.service';
 
 export interface ProjectDTO {
@@ -69,7 +69,7 @@ export class ProjectService {
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Bir hata oluştu';
-    
+
     if (!navigator.onLine) {
       errorMessage = 'İnternet bağlantınızı kontrol edin';
     } else if (error.status === 0) {
@@ -87,13 +87,13 @@ export class ProjectService {
     } else {
       errorMessage = `Sunucu hatası: ${error.status}\nMesaj: ${error.message}`;
     }
-    
+
     console.error('API Hatası:', {
       status: error.status,
       message: error.message,
       error: error.error
     });
-    
+
     return throwError(() => new Error(errorMessage));
   }
-} 
+}

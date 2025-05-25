@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StorageService } from '../../../../core/services/storage.service';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment.prod';
 import { map } from 'rxjs/operators';
 
 const API_URL = 'http://16.170.205.160:8081/api';
@@ -146,4 +146,4 @@ export class DigitalCardService {
       })
     );
   }
-} 
+}
