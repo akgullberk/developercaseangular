@@ -30,7 +30,10 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () => import('./features/digital-card/presentation/create-card/create-card.component').then(m => m.CreateCardComponent)
   },
-  { path: 'edit-card', component: EditCardComponent },
+  { 
+    path: 'edit-card', 
+    component: EditCardComponent
+  },
   {
     path: 'all-cards',
     loadComponent: () => import('./features/digital-card/presentation/all-cards/all-cards.component').then(m => m.AllCardsComponent)
@@ -57,10 +60,7 @@ export const routes: Routes = [
   {
     path: 'edit-project/:id',
     loadComponent: () => import('./features/projects/presentation/edit-project/edit-project.component')
-      .then(m => {
-        console.log('EditProjectComponent yükleniyor...');
-        return m.EditProjectComponent;
-      }),
+      .then(m => m.EditProjectComponent),
     canActivate: [AuthGuard]
   }
 ];
