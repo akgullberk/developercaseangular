@@ -5,7 +5,7 @@ import { StorageService } from '../../../../core/services/storage.service';
 import { environment } from '../../../../../environments/environment.prod';
 import { map, catchError } from 'rxjs/operators';
 
-const API_URL = `${environment.apiUrl}/digital-cards`;
+const API_URL = `${environment.apiUrl}/api/digital-cards`;
 
 export interface SocialMediaLink {
   platform: string;

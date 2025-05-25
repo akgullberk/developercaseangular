@@ -7,9 +7,8 @@ import { RegisterRequest } from '../../domain/models/register-request.model';
 import { StorageService } from '../../../../core/services/storage.service';
 import { environment } from '../../../../../environments/environment.prod';
 
-// /api zaten environment.apiUrl içinde olduğu için tekrar eklemiyoruz
-const AUTH_URL = `${environment.apiUrl}/auth`;
-const USERS_URL = `${environment.apiUrl}/users`;
+const AUTH_URL = `${environment.apiUrl}/api/auth`;
+const USERS_URL = `${environment.apiUrl}/api/users`;
 
 export interface UserProfile {
   id: number;
