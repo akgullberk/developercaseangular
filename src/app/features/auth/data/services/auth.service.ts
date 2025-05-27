@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { LoginRequest } from '../../domain/models/login-request.model';
 import { RegisterRequest } from '../../domain/models/register-request.model';
 import { StorageService } from '../../../../core/services/storage.service';
-import { environment } from '../../../../../environments/environment.prod';
 
-const AUTH_URL = `${environment.apiUrl}/api/auth`;
-const USERS_URL = `${environment.apiUrl}/api/users`;
+const API_URL = 'http://13.48.69.251:8081/api';
 
 export interface UserProfile {
   id: number;
@@ -22,6 +21,8 @@ export interface UserProfile {
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly AUTH_URL = `${API_URL}/auth`;
+
   constructor(
     private http: HttpClient,
     private storage: StorageService
@@ -29,7 +30,7 @@ export class AuthService {
 
   login(loginRequest: LoginRequest): Observable<any> {
     console.log('Login isteği gönderiliyor:', loginRequest);
-    return this.http.post(`${AUTH_URL}/login`, loginRequest)
+    return this.http.post(`${this.AUTH_URL}/login`, loginRequest)
       .pipe(
         tap((response: any) => {
           console.log('Login yanıtı:', response);
@@ -47,7 +48,7 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post(`${AUTH_URL}/register`, registerRequest, { headers })
+    return this.http.post(`${this.AUTH_URL}/register`, registerRequest, { headers })
       .pipe(
         map((response: any) => {
           console.log('Kayıt yanıtı:', response);
@@ -79,7 +80,7 @@ export class AuthService {
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.get<UserProfile>(`${USERS_URL}/profile`, { headers });
+    return this.http.get<UserProfile>(`${API_URL}/users/profile`, { headers });
   }
 
   updateUserProfile(profileData: Partial<UserProfile>): Observable<UserProfile> {
@@ -89,6 +90,6 @@ export class AuthService {
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.patch<UserProfile>(`${USERS_URL}/profile`, profileData, { headers });
+    return this.http.patch<UserProfile>(`${API_URL}/users/profile`, profileData, { headers });
   }
 }

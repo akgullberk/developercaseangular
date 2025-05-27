@@ -3,9 +3,9 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { StorageService } from '../../../../core/services/storage.service';
 import { environment } from '../../../../../environments/environment.prod';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, retry } from 'rxjs/operators';
 
-const API_URL = `${environment.apiUrl}/api/digital-cards`;
+const API_URL = `${environment.apiUrl}/digital-cards`;
 
 export interface SocialMediaLink {
   platform: string;
@@ -64,8 +64,6 @@ export interface CardWithProjectsDTO {
   providedIn: 'root'
 })
 export class DigitalCardService {
-  private readonly DIGITAL_CARDS_URL = `${API_URL}/my-cards`;
-
   constructor(
     private readonly http: HttpClient,
     private readonly storage: StorageService
@@ -75,8 +73,23 @@ export class DigitalCardService {
     const token = this.storage.getItem('token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Accept': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
     });
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    console.error('API Error:', error);
+    let errorMessage = 'Bir hata oluştu';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `İstemci hatası: ${error.error.message}`;
+    } else if (error.status === 0) {
+      errorMessage = 'Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.';
+    } else {
+      errorMessage = `Sunucu hatası: ${error.status} - ${error.message}`;
+    }
+    console.error(errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 
   private fixProfilePhotoUrl(card: any): any {
@@ -87,17 +100,26 @@ export class DigitalCardService {
   }
 
   getCards(): Observable<DigitalCardResponse[]> {
+    console.log('Fetching cards from:', `${API_URL}/my-cards`);
     return this.http.get<DigitalCardResponse[]>(
-      `${this.DIGITAL_CARDS_URL}`,
-      { headers: this.getHeaders() }
+      `${API_URL}/my-cards`,
+      { 
+        headers: this.getHeaders(),
+        observe: 'response'
+      }
     ).pipe(
-      map(cards => cards.map(card => this.fixProfilePhotoUrl(card)))
+      retry(1),
+      map(response => {
+        console.log('Cards API Response:', response);
+        return (response.body || []).map(card => this.fixProfilePhotoUrl(card));
+      }),
+      catchError(this.handleError)
     );
   }
 
   createDigitalCard(cardData: DigitalCardRequest): Observable<DigitalCardResponse> {
     return this.http.post<DigitalCardResponse>(
-      this.DIGITAL_CARDS_URL,
+      API_URL,
       cardData,
       { headers: this.getHeaders() }
     ).pipe(
@@ -115,7 +137,7 @@ export class DigitalCardService {
 
   updateDigitalCard(cardData: DigitalCardRequest): Observable<DigitalCardResponse> {
     return this.http.put<DigitalCardResponse>(
-      this.DIGITAL_CARDS_URL,
+      API_URL,
       cardData,
       { headers: this.getHeaders() }
     ).pipe(
@@ -125,7 +147,7 @@ export class DigitalCardService {
 
   deleteDigitalCard(): Observable<void> {
     return this.http.delete<void>(
-      this.DIGITAL_CARDS_URL,
+      API_URL,
       { headers: this.getHeaders() }
     );
   }
