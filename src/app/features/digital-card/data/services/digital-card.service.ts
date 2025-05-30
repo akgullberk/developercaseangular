@@ -5,7 +5,7 @@ import { StorageService } from '../../../../core/services/storage.service';
 import { environment } from '../../../../../environments/environment.prod';
 import { map, catchError, retry } from 'rxjs/operators';
 
-const API_URL = `${environment.apiUrl}/digital-cards`;
+const API_URL = `http://13.48.69.251:8081/api/digital-cards`;
 
 export interface SocialMediaLink {
   platform: string;
@@ -79,16 +79,21 @@ export class DigitalCardService {
   }
 
   private handleError(error: HttpErrorResponse) {
-    console.error('API Error:', error);
     let errorMessage = 'Bir hata oluştu';
+
     if (error.error instanceof ErrorEvent) {
-      errorMessage = `İstemci hatası: ${error.error.message}`;
-    } else if (error.status === 0) {
-      errorMessage = 'Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.';
+      // Client-side hata
+      errorMessage = `Hata: ${error.error.message}`;
     } else {
-      errorMessage = `Sunucu hatası: ${error.status} - ${error.message}`;
+      // Server-side hata
+      if (error.status === 0) {
+        errorMessage = 'Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.';
+      } else {
+        errorMessage = `Sunucu hatası: ${error.status} - ${error.message}`;
+      }
     }
-    console.error(errorMessage);
+
+    console.error('API Hatası:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 
@@ -103,7 +108,7 @@ export class DigitalCardService {
     console.log('Fetching cards from:', `${API_URL}/my-cards`);
     return this.http.get<DigitalCardResponse[]>(
       `${API_URL}/my-cards`,
-      { 
+      {
         headers: this.getHeaders(),
         observe: 'response'
       }
@@ -154,7 +159,9 @@ export class DigitalCardService {
 
   getAllDigitalCards(): Observable<DigitalCardResponse[]> {
     return this.http.get<DigitalCardResponse[]>(`${API_URL}/all`).pipe(
-      map(cards => cards.map(card => this.fixProfilePhotoUrl(card)))
+      retry(1), // Bir kez yeniden deneme
+      map(cards => cards.map(card => this.fixProfilePhotoUrl(card))),
+      catchError(this.handleError)
     );
   }
 
