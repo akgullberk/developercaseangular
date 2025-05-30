@@ -7,7 +7,7 @@ import { environment } from '../../../../../environments/environment.prod';
   providedIn: 'root'
 })
 export class FileUploadService {
-  private baseUrl = `${environment.apiUrl}/api/files`;
+  private baseUrl = `${environment.apiUrl}/files`;
 
   constructor(private http: HttpClient) {}
 
